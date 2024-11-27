@@ -126,7 +126,7 @@ for i in range(len(dropdown_labels)):
 
     dropdown = OptionMenu(search_frame, dropdown_options[i], *items[i], command=lambda _: update_dropdown())
     dropdown.config(width=20, bg="white")
-    dropdown.grid(row=3+i, column=0, padx=10, pady=5)
+    dropdown.grid(row=3+i, column=0, padx=10, pady=10)
 
 #Getting results from advanced search
 def fetch_plant_results():
