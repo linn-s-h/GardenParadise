@@ -51,7 +51,7 @@ def get_column_values(column_name):
     return values
 
 
-
+###############################################################
 
 #GUI
 window = Tk()
@@ -104,81 +104,54 @@ scrollbar_canvas.bind('<Configure>', lambda e: scrollbar_canvas.configure(scroll
 scrollable_frame = Frame(scrollbar_canvas)
 scrollbar_canvas.create_window((0,0), window=scrollable_frame, anchor=NW)
 
-
-#Dropdown manues in result frame
-items_plant_type =  get_distinct_values(f"`Plant Type`") 
-items_climate_zones = get_distinct_values(f"`Climate Zones`")
-items_flower_colour = get_distinct_values(f"`Flower Colour`")
-items_tolerance = get_column_values(f"tolerance")
-items_attracting = get_column_values(f"attracting")
-
-#Option selected
-option_plant_type = StringVar()
-option_plant_type.set("")
-option_climate_zones = StringVar()
-option_climate_zones.set("")
-option_flower_colour = StringVar()
-option_flower_colour.set("")
-option_tolerance = StringVar()
-option_tolerance.set("")
-option_attracting = StringVar()
-option_attracting.set("")
-
 #Advanced setting label
 advanced_search_label = Label(search_frame, text="Advanced search", font=("Arial", 16, "bold"))
-advanced_search_label.grid(padx=10, pady=10, row=4, column=0)
+advanced_search_label.grid(padx=10, pady=10, row=2, column=0)
 
+dropdown_labels = ["Plant Type", "Climate Zones", "Flower Colour", "Tolerance", "Attracting"]
 
-#Plant Type Dropmenu
-dropmenu_plant_type = OptionMenu(search_frame, option_plant_type, *items_plant_type, command=lambda _: update_dropdown())
-dropmenu_plant_type.config(width=20, bg="white")
-dropmenu_plant_type.grid(padx=10, pady=10, row=5, column=0)
+#Putting results from dropdown menu selection in a list
+items = [
+    get_distinct_values(f"`Plant Type`") , 
+    get_distinct_values(f"`Climate Zones`"), 
+    get_distinct_values(f"`Flower Colour`"),
+    get_column_values(f"tolerance"),
+    get_column_values(f"attracting")]  
 
-#Climate Zones Dropmenu
-dropmenu_climate_zones = OptionMenu(search_frame, option_climate_zones, *items_climate_zones, command=lambda _: update_dropdown())
-dropmenu_climate_zones.config(width=20, bg="white")
-dropmenu_climate_zones.grid(padx=10, pady=10, row=6, column=0)
+#Creating a list of StringVar instances, one for each dropdown menu
+dropdown_options = [StringVar(value="") for _ in dropdown_labels]
 
-#Flower Colour Dropmenu
-dropmenu_flower_colour = OptionMenu(search_frame, option_flower_colour, *items_flower_colour, command=lambda _: update_dropdown())
-dropmenu_flower_colour.config(width=20, bg="white")
-dropmenu_flower_colour.grid(padx=10, pady=10, row=7, column=0)
+#Creating dropdown menus
+for i in range(len(dropdown_labels)):
 
-#Tolerance Dropmenu
-dropmenu_tolerance = OptionMenu(search_frame, option_tolerance, *items_tolerance, command=lambda _: update_dropdown())
-dropmenu_tolerance.config(width=20, bg="white")
-dropmenu_tolerance.grid(padx=10, pady=10, row=8, column=0)
-
-#Attracting Dropmenu
-dropmenu_attracting = OptionMenu(search_frame, option_attracting, *items_attracting, command=lambda _: update_dropdown())
-dropmenu_attracting.config(width=20, bg="white")
-dropmenu_attracting.grid(padx=10, pady=10, row=9, column=0)
+    dropdown = OptionMenu(search_frame, dropdown_options[i], *items[i], command=lambda _: update_dropdown())
+    dropdown.config(width=20, bg="white")
+    dropdown.grid(row=3+i, column=0, padx=10, pady=5)
 
 #Getting results from advanced search
 def fetch_plant_results():
 
     mydb, cursor = connectDB()
     results = []
-    
     query = """
         SELECT `Common Name`, `Botanical Name`
         FROM plants
         WHERE 1+1
     """
 
-    if option_plant_type.get():
+    if dropdown_options[0].get():
         query += " AND `Plant Type` = %s"
-        results.append(option_plant_type.get())
-    if option_climate_zones.get():
+        results.append(dropdown_options[0].get()) #Plant type dropdown
+    if dropdown_options[1].get():
         query += " AND `Climate Zones` = %s"
-        results.append(option_climate_zones.get())
-    if option_flower_colour.get():
+        results.append(dropdown_options[1].get()) #Climate zones dropdown
+    if dropdown_options[2].get():
         query += " AND `Flower Colour` = %s"
-        results.append(option_flower_colour.get())
-    if option_tolerance.get():
-        query += f" AND `{option_tolerance.get()}` = 'Yes'"
-    if option_attracting.get():
-        query += f" AND `{option_attracting.get()}` = 'Yes'"
+        results.append(dropdown_options[2].get()) #Flower colour dropdown
+    if dropdown_options[3].get():
+        query += f" AND `{dropdown_options[3].get()}` = 'Yes'" #Tolerance dropdown
+    if dropdown_options[4].get():
+        query += f" AND `{dropdown_options[4].get()}` = 'Yes'" #Attracting dropdown
  
     cursor.execute(query, (tuple(results)))
     result = cursor.fetchall()
@@ -224,11 +197,8 @@ def show_plants():
             more_info_button.pack(anchor="center", padx=5, pady=2)
 
 
-    option_plant_type.set("")
-    option_climate_zones.set("")
-    option_flower_colour.set("")
-    option_tolerance.set("")
-    option_attracting.set("")
+    for i in range(len(dropdown_labels)):
+        dropdown_options[i].set("")
 
 #Find plant search button
 find_plant_button = Button(search_frame, text="Find plant", font=("Arial", 12), command=show_plants)
