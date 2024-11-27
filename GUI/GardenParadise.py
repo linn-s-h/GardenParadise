@@ -1,7 +1,7 @@
 import mysql.connector
 from tkinter import *
 from tkinter import PhotoImage
-#from PIL import Image, ImageTk
+from PIL import Image, ImageTk
 
 DB_HOST = "localhost"
 DB_USER = "root"
@@ -51,6 +51,7 @@ def get_column_values(column_name):
     return values
 
 
+
 ###############################################################
 
 #GUI
@@ -77,7 +78,7 @@ result_frame = Frame(window, bg= "white")
 result_frame.grid(row=1, column=1, sticky="nsew")
 
 #Menu frame content
-title_label = Label(menu_frame, text="Garden Paradise", font=("Helvetica", 24, "bold"), bg="#06402B", fg="white")
+title_label = Label(menu_frame, text="Garden Paradise", font=("Helvetica", 28, "bold"), bg="#06402B", fg="white")
 title_label.pack(padx=20, pady=20, side="left")
 
 #Search frame content
@@ -102,6 +103,7 @@ scrollbar_canvas.configure(yscrollcommand=scrollbar.set)
 scrollbar_canvas.bind('<Configure>', lambda e: scrollbar_canvas.configure(scrollregion=scrollbar_canvas.bbox("all")))
 
 scrollable_frame = Frame(scrollbar_canvas)
+scrollable_frame.place(relx=1, rely=1, relwidth=1, relheight=1)
 scrollbar_canvas.create_window((0,0), window=scrollable_frame, anchor=NW)
 
 #Advanced setting label
@@ -168,20 +170,21 @@ def show_plants():
 
     plants = fetch_plant_results()
 
-    for idx, (common_name, botanical_name) in enumerate(plants):
+    for row_idx, (common_name, botanical_name) in enumerate(plants):
+            column_count = row_idx % 2
             plant_frame = Frame(scrollable_frame, bg="lightgray", relief=SOLID, borderwidth=1, width=100, height=150)
-            plant_frame.grid(row=idx, column=0, padx=10, pady=5, sticky="ew")
+            plant_frame.grid(row=row_idx // 2, column=column_count, padx=10, pady=10, sticky="ew")
             plant_frame.grid_propagate(False)  # Prevent resizing
 
             # Image
-            #image = Image.open(r"C:\Users\linns\OneDrive\Desktop\Relational Database\GardenParadise\Data\cute-pot.png")
-            #resize_image = image.resize((30, 30))  # Resize to a larger size if 10x10 is too small
-            #img = ImageTk.PhotoImage(resize_image)  # Use ImageTk.PhotoImage, not PhotoImage
+            image = Image.open(r"C:\Users\linns\OneDrive\Desktop\Relational Database\GardenParadise\Data\cute-pot.png")
+            resize_image = image.resize((80, 80))  # Resize to a larger size if 10x10 is too small
+            img = ImageTk.PhotoImage(resize_image)  # Use ImageTk.PhotoImage, not PhotoImage
 
             # Add the image to a Label
-            #image_label = Label(plant_frame, image=img, bg="lightgray")
-            #image_label.image = img  # Keep a reference to prevent garbage collection
-            #image_label.pack(anchor="center", padx=5, pady=5)
+            image_label = Label(plant_frame, image=img, bg="lightgray")
+            image_label.image = img  # Keep a reference to prevent garbage collection
+            image_label.pack(anchor="center", padx=5, pady=5)
             
 
             # Display common name
@@ -193,8 +196,8 @@ def show_plants():
             botanical_label.pack(anchor="center", padx=5, pady=2)
 
             # More info Button
-            more_info_button = Button(plant_frame, text="More info", font=("Arial", 10))
-            more_info_button.pack(anchor="center", padx=5, pady=2)
+            more_info_button = Button(plant_frame, text="More info", font=("Arial", 8))
+            more_info_button.pack(anchor="center", padx=5, pady=10)
 
 
     for i in range(len(dropdown_labels)):
