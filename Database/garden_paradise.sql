@@ -2,6 +2,7 @@
 /*
 
 Our Garden Paradise Database
+Creation!
 
 */
 
@@ -50,10 +51,6 @@ CREATE TABLE plants (
     PRIMARY KEY (`Plant ID`)
 );
 
-SELECT * FROM plants;
-DESCRIBE plants;
-DROP TABLE IF EXISTS plants;
-
 #Edited out because it didn' work. Used Load Data Import Wizard instead
 /*
 LOAD DATA LOCAL INFILE '/path/waterwise-plants.csv'
@@ -76,6 +73,8 @@ CREATE TABLE images (
     PRIMARY KEY (`Image ID`),
     FOREIGN KEY (`Plant ID`) REFERENCES plants(`Plant ID`)
 );
+
+SELECT * FROM plants;
 
 #Insert data
 INSERT INTO images (`Plant ID`,`Image`, `Image Location`, `Image Owner`, `Herb Images Change To`, `Why Photo Removed`)
@@ -112,6 +111,19 @@ DROP COLUMN `Image Location`,
 DROP COLUMN `Image Owner`,
 DROP COLUMN `Herb Images Change To`,
 DROP COLUMN `Why Photo Removed`;
+
+ALTER TABLE plants
+DROP COLUMN id;
+
+SELECT COUNT(`Plant Type`), (SELECT DISTINCT `Plant Type`) FROM plants GROUP BY `Plant Type`;
+
+
+
+
+
+
+
+
 
 
 
