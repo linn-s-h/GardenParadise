@@ -215,4 +215,18 @@ find_plant_button = Button(search_frame, text="Find plant", font=("Arial", 12), 
 find_plant_button.grid(padx=10, pady=10)
 
 
-wi
+window.mainloop()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
