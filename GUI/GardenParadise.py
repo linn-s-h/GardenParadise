@@ -161,6 +161,12 @@ def fetch_plant_results():
 
     return result
 
+def show_selected_plant():
+    plant_window = Toplevel()
+    plant_window.title("")
+    plant_window.geometry("600x500")
+
+
 #Showing advanced search results
 def show_plants():
 
@@ -171,33 +177,33 @@ def show_plants():
     plants = fetch_plant_results()
 
     for row_idx, (common_name, botanical_name) in enumerate(plants):
-            column_count = row_idx % 2
-            plant_frame = Frame(scrollable_frame, bg="lightgray", relief=SOLID, borderwidth=1, width=100, height=150)
-            plant_frame.grid(row=row_idx // 2, column=column_count, padx=10, pady=10, sticky="ew")
-            plant_frame.grid_propagate(False)  # Prevent resizing
+        column_count = row_idx % 2
+        plant_frame = Frame(scrollable_frame, bg="lightgray", relief=SOLID, borderwidth=1, width=100, height=150)
+        plant_frame.grid(row=row_idx // 2, column=column_count, padx=10, pady=10, sticky="ew")
+        plant_frame.grid_propagate(False)  # Prevent resizing
 
-            # Image
-            image = Image.open(r"C:\Users\linns\OneDrive\Desktop\Relational Database\GardenParadise\Data\cute-pot.png")
-            resize_image = image.resize((80, 80))  # Resize to a larger size if 10x10 is too small
-            img = ImageTk.PhotoImage(resize_image)  # Use ImageTk.PhotoImage, not PhotoImage
+        # Image
+        image = Image.open(r"C:\Users\linns\OneDrive\Desktop\Relational Database\GardenParadise\Data\cute-pot.png")
+        resize_image = image.resize((80, 80))  # Resize to a larger size if 10x10 is too small
+        img = ImageTk.PhotoImage(resize_image)  # Use ImageTk.PhotoImage, not PhotoImage
 
-            # Add the image to a Label
-            image_label = Label(plant_frame, image=img, bg="lightgray")
-            image_label.image = img  # Keep a reference to prevent garbage collection
-            image_label.pack(anchor="center", padx=5, pady=5)
-            
+        # Add the image to a Label
+        image_label = Label(plant_frame, image=img, bg="lightgray")
+        image_label.image = img  # Keep a reference to prevent garbage collection
+        image_label.pack(anchor="center", padx=5, pady=5)
+        
 
-            # Display common name
-            common_label = Label(plant_frame, text=f"{common_name}", font=("Arial", 12, "bold"), bg="lightgray")
-            common_label.pack(anchor="center", padx=5, pady=2)
+        # Display common name
+        common_label = Label(plant_frame, text=f"{common_name}", font=("Arial", 12, "bold"), bg="lightgray")
+        common_label.pack(anchor="center", padx=5, pady=2)
 
-            # Display botanical name
-            botanical_label = Label(plant_frame, text=f"{botanical_name}", font=("Arial", 12, "italic"), bg="lightgray")
-            botanical_label.pack(anchor="center", padx=5, pady=2)
+        # Display botanical name
+        botanical_label = Label(plant_frame, text=f"{botanical_name}", font=("Arial", 12, "italic"), bg="lightgray")
+        botanical_label.pack(anchor="center", padx=5, pady=2)
 
-            # More info Button
-            more_info_button = Button(plant_frame, text="More info", font=("Arial", 8))
-            more_info_button.pack(anchor="center", padx=5, pady=10)
+        # More info Button
+        more_info_button = Button(plant_frame, text="More info", font=("Arial", 8), command=show_selected_plant)
+        more_info_button.pack(anchor="center", padx=5, pady=10)
 
 
     for i in range(len(dropdown_labels)):
