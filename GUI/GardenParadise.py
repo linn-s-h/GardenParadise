@@ -5,8 +5,8 @@ from PIL import Image, ImageTk
 
 DB_HOST = "localhost"
 DB_USER = "root"
-DB_PASSWORD = "36Cc7919!"
-DB_DATABASE = "garden_paradise"
+DB_PASSWORD = "Clownpokemon8"
+DB_DATABASE = "mydb"
 
 #Connection code 
 def connectDB():
@@ -153,7 +153,9 @@ def fetch_plant_results():
         query += f" AND `{dropdown_options[3].get()}` = 'Yes'" #Tolerance dropdown
     if dropdown_options[4].get():
         query += f" AND `{dropdown_options[4].get()}` = 'Yes'" #Attracting dropdown
- 
+
+    query += " LIMIT 16;"
+    
     cursor.execute(query, (tuple(results)))
     result = cursor.fetchall()
     mydb.close()
@@ -182,7 +184,7 @@ def show_plants():
         plant_frame.grid_propagate(False)  # Prevent resizing
 
         # Image
-        image = Image.open(r"C:\Users\linns\OneDrive\Desktop\Relational Database\GardenParadise\Data\cute-pot.png")
+        image = Image.open(r"/Users/joaquingarcia/Documents/31305 Relational Databases/GardenParadise/Data/cute-pot.png")
         resize_image = image.resize((80, 80))  # Resize to a larger size if 10x10 is too small
         img = ImageTk.PhotoImage(resize_image)  # Use ImageTk.PhotoImage, not PhotoImage
 
@@ -191,7 +193,6 @@ def show_plants():
         image_label.image = img  # Keep a reference to prevent garbage collection
         image_label.pack(anchor="center", padx=5, pady=5)
         
-
         # Display common name
         common_label = Label(plant_frame, text=f"{common_name}", font=("Arial", 12, "bold"), bg="lightgray")
         common_label.pack(anchor="center", padx=5, pady=2)
