@@ -51,7 +51,6 @@ def get_column_values(column_name):
     return values
 
 
-
 ###############################################################
 
 #GUI
