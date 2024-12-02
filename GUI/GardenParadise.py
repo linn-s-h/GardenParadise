@@ -126,9 +126,9 @@ dropdown_options = [StringVar(value="") for _ in dropdown_labels]
 #Creating dropdown menus
 for i in range(len(dropdown_labels)):
 
-    dropdown = OptionMenu(search_frame, dropdown_options[i], *items[i], command=lambda _: update_dropdown())
+    dropdown = OptionMenu(search_frame, dropdown_options[i], *items[i]) # command=lambda _: update_dropdown()
     dropdown.config(width=20, bg="white")
-    dropdown.grid(row=3+i, column=0, padx=10, pady=10)
+    dropdown.grid(row=3+i, column=0, padx=10, pady=10, sticky="ew")
 
 #Getting results from advanced search
 def fetch_plant_results():
@@ -163,10 +163,35 @@ def fetch_plant_results():
 
     return result
 
-def show_selected_plant():
-    plant_window = Toplevel()
-    plant_window.title("")
-    plant_window.geometry("600x500")
+# Joaquin do this
+def show_selected_plant(plant_id):
+    # Connect to the database and fetch details for the selected plant
+    mydb, cursor = connectDB()
+    
+    query = """
+    SELECT `Common Name`, `Botanical Name`, `Plant Type`, `Climate Zones`, `Flower Colour`, 
+           `Tolerance`, `Attracting`, `Description`
+    FROM plants
+    WHERE `Plant ID` = %s
+    """
+    cursor.execute(query, (plant_id))
+    plant_details = cursor.fetchone()  # Fetch the details of the selected plant
+    
+    mydb.close()   
+
+    if TRUE:# plant_details:
+        plant_window = Toplevel()
+        plant_window.title("")
+        plant_window.geometry("600x500")
+       
+       # Display the details in the new window
+        common_name_label = Label(plant_window, text=f"Common Name: {plant_details[0]}", font=("Arial", 14))
+        common_name_label.pack(pady=10)
+
+        botanical_name_label = Label(plant_window, text=f"Botanical Name: {plant_details[1]}", font=("Arial", 14))
+        botanical_name_label.pack(pady=10)
+    else:
+        print("No details found for this plant.")
 
 
 #Showing advanced search results
@@ -203,7 +228,7 @@ def show_plants():
         botanical_label.pack(anchor="center", padx=5, pady=2)
 
         # More info Button
-        more_info_button = Button(plant_frame, text="More info", font=("Arial", 8), command=show_selected_plant)
+        more_info_button = Button(plant_frame, text="More info", font=("Arial", 8), command=lambda : show_selected_plant(3))
         more_info_button.pack(anchor="center", padx=5, pady=10)
 
 
