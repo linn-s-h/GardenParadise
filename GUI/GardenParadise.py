@@ -5,8 +5,8 @@ from PIL import Image, ImageTk
 
 DB_HOST = "localhost"
 DB_USER = "root"
-DB_PASSWORD = "Clownpokemon8"
-DB_DATABASE = "mydb"
+DB_PASSWORD = "36Cc7919!"
+DB_DATABASE = "garden_paradise"
 
 #Connection code 
 def connectDB():
@@ -44,11 +44,58 @@ def get_column_values(column_name):
         FROM INFORMATION_SCHEMA.COLUMNS
         WHERE TABLE_NAME = 'plants' AND COLUMN_NAME LIKE %s
     """
-    # Execute the query with parameterized input
     cursor.execute(query, (f"%{column_name}%",))
     values = [row[0] for row in cursor.fetchall()]
     mydb.close()
     return values
+
+#Getting results from advanced search
+def fetch_plant_results():
+
+    mydb, cursor = connectDB()
+    results = []
+    query = """
+        SELECT `Common Name`, `Botanical Name`
+        FROM plants
+        WHERE 1+1
+    """
+
+    if dropdown_options[0].get():
+        query += " AND `Plant Type` = %s"
+        results.append(dropdown_options[0].get()) #Plant type dropdown
+    if dropdown_options[1].get():
+        query += " AND `Climate Zones` = %s"
+        results.append(dropdown_options[1].get()) #Climate zones dropdown
+    if dropdown_options[2].get():
+        query += " AND `Flower Colour` = %s"
+        results.append(dropdown_options[2].get()) #Flower colour dropdown
+    if dropdown_options[3].get():
+        query += f" AND `{dropdown_options[3].get()}` = 'Yes'" #Tolerance dropdown
+    if dropdown_options[4].get():
+        query += f" AND `{dropdown_options[4].get()}` = 'Yes'" #Attracting dropdown
+
+    query += " LIMIT 16;"
+    
+    cursor.execute(query, (tuple(results)))
+    values = cursor.fetchall()
+    mydb.close()
+    return values
+
+#Getting plant results from search bar entry
+def get_plants_by_search(plant_name):
+    mydb, cursor = connectDB()
+    query = """
+    SELECT `Common Name`, `Botanical Name`
+    FROM plants
+    WHERE `Common Name` LIKE %s OR `Botanical Name` LIKE %s
+    ORDER BY `Common Name` ASC
+    LIMIT 16;
+    """
+    cursor.execute(query, (f"%{plant_name}%", f"%{plant_name}%",))
+    values = cursor.fetchall()
+    mydb.close()
+    return values
+
 
 
 ###############################################################
@@ -82,11 +129,7 @@ title_label.pack(padx=20, pady=20, side="left")
 
 #Search frame content
 search_entry = Entry(search_frame)
-search_entry.insert(0, "Search by common name or botanical name")
 search_entry.grid(row=0, column=0, padx=(5, 10), pady=10, sticky="ew")  # Place in grid
-
-search_button = Button(search_frame, text="Search", font=("Arial", 12))
-search_button.grid(row=1, column=0, padx=(5, 10), pady=10)  # Place next to entry
 
 #Scrollbar
 scrollbar_frame = Frame(result_frame)
@@ -129,62 +172,23 @@ for i in range(len(dropdown_labels)):
     dropdown.config(width=20, bg="white")
     dropdown.grid(row=3+i, column=0, padx=10, pady=10)
 
-#Getting results from advanced search
-def fetch_plant_results():
-
-    mydb, cursor = connectDB()
-    results = []
-    query = """
-        SELECT `Common Name`, `Botanical Name`
-        FROM plants
-        WHERE 1+1
-    """
-
-    if dropdown_options[0].get():
-        query += " AND `Plant Type` = %s"
-        results.append(dropdown_options[0].get()) #Plant type dropdown
-    if dropdown_options[1].get():
-        query += " AND `Climate Zones` = %s"
-        results.append(dropdown_options[1].get()) #Climate zones dropdown
-    if dropdown_options[2].get():
-        query += " AND `Flower Colour` = %s"
-        results.append(dropdown_options[2].get()) #Flower colour dropdown
-    if dropdown_options[3].get():
-        query += f" AND `{dropdown_options[3].get()}` = 'Yes'" #Tolerance dropdown
-    if dropdown_options[4].get():
-        query += f" AND `{dropdown_options[4].get()}` = 'Yes'" #Attracting dropdown
-
-    query += " LIMIT 16;"
-    
-    cursor.execute(query, (tuple(results)))
-    result = cursor.fetchall()
-    mydb.close()
-
-    return result
-
 def show_selected_plant():
     plant_window = Toplevel()
     plant_window.title("")
     plant_window.geometry("600x500")
 
 
-#Showing advanced search results
-def show_plants():
+#GUI function that displays the plants after search in scrollable_frame
+def show_plants(plants):
 
-    #Clear existing widgets in the scrollable frame
-    for widget in scrollable_frame.winfo_children():
-        widget.destroy()
-
-    plants = fetch_plant_results()
-
-    for row_idx, (common_name, botanical_name) in enumerate(plants):
+     for row_idx, (common_name, botanical_name) in enumerate(plants):
         column_count = row_idx % 2
         plant_frame = Frame(scrollable_frame, bg="lightgray", relief=SOLID, borderwidth=1, width=100, height=150)
         plant_frame.grid(row=row_idx // 2, column=column_count, padx=10, pady=10, sticky="ew")
         plant_frame.grid_propagate(False)  # Prevent resizing
 
         # Image
-        image = Image.open(r"/Users/joaquingarcia/Documents/31305 Relational Databases/GardenParadise/Data/cute-pot.png")
+        image = Image.open(r"C:\Users\linns\OneDrive\Desktop\Relational Database\GardenParadise\Data\cute-pot.png")
         resize_image = image.resize((80, 80))  # Resize to a larger size if 10x10 is too small
         img = ImageTk.PhotoImage(resize_image)  # Use ImageTk.PhotoImage, not PhotoImage
 
@@ -206,12 +210,38 @@ def show_plants():
         more_info_button.pack(anchor="center", padx=5, pady=10)
 
 
+#Showing advanced search results
+def show_advanced_search():
+
+    #Clear existing widgets in the scrollable frame
+    for widget in scrollable_frame.winfo_children():
+        widget.destroy()
+
+    plants = fetch_plant_results()
+    show_plants(plants)
+
     for i in range(len(dropdown_labels)):
         dropdown_options[i].set("")
 
+def show_entry_search(event=None):
+
+    #Clear existing widgets in the scrollable frame
+    for widget in scrollable_frame.winfo_children():
+        widget.destroy()
+
+    plant_name = search_entry.get().strip()
+    plants = get_plants_by_search(plant_name)
+    show_plants(plants)
+
 #Find plant search button
-find_plant_button = Button(search_frame, text="Find plant", font=("Arial", 12), command=show_plants)
+find_plant_button = Button(search_frame, text="Find plant", font=("Arial", 12), command=show_advanced_search)
 find_plant_button.grid(padx=10, pady=10)
+
+#Search plant button
+search_button = Button(search_frame, text="Search", font=("Arial", 12), command=show_entry_search)
+search_button.grid(row=1, column=0, padx=(5, 10), pady=10)  # Place next to entry
+search_entry.bind('<Return>', show_entry_search)
+
 
 
 window.mainloop()
