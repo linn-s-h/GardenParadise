@@ -268,13 +268,20 @@ def show_plants(plants):
         more_info_button.pack(anchor="center", padx=5, pady=10)
 
 
-#Showing advanced search results
-def show_advanced_search():
+#Clear existing widgets in the scrollable frame and entry
+def clear_entry_and_frame():
+    for widget in scrollable_frame.winfo_children():
+        widget.destroy()
+    search_entry.delete(0, 'end')
 
-    #Clear existing widgets in the scrollable frame
+def clear_frame():
     for widget in scrollable_frame.winfo_children():
         widget.destroy()
 
+#Showing advanced search results
+def show_advanced_search():
+
+    clear_entry_and_frame()
     plants = fetch_plant_results()
     show_plants(plants)
 
@@ -283,10 +290,7 @@ def show_advanced_search():
 
 def show_entry_search(event=None):
 
-    #Clear existing widgets in the scrollable frame
-    for widget in scrollable_frame.winfo_children():
-        widget.destroy()
-
+    clear_frame()
     plant_name = search_entry.get().strip()
     plants = get_plants_by_search(plant_name)
     show_plants(plants)
