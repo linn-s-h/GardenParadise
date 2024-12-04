@@ -5,8 +5,8 @@ from PIL import Image, ImageTk
 
 DB_HOST = "localhost"
 DB_USER = "root"
-DB_PASSWORD = "36Cc7919!"
-DB_DATABASE = "garden_paradise"
+DB_PASSWORD = "Clownpokemon8"
+DB_DATABASE = "mydb"
 
 #Connection code 
 def connectDB():
@@ -188,7 +188,7 @@ def fetch_plant_results():
     mydb, cursor = connectDB()
     results = []
     query = """
-        SELECT `Common Name`, `Botanical Name`
+        SELECT `Common Name`, `Botanical Name`, `plant_id`
         FROM plants
         WHERE 1+1
     """
@@ -231,7 +231,7 @@ def show_selected_plant(plant_id):
     
     mydb.close()   
 
-    if TRUE:# plant_details:
+    if plant_details:# plant_details:
         plant_window = Toplevel()
         plant_window.title("")
         plant_window.geometry("600x500")
@@ -259,10 +259,10 @@ def show_plants(plants):
             plant_frame = Frame(scrollable_frame, bg="lightgray", relief=SOLID, borderwidth=1)
             plant_frame.grid(row=row_idx // 3, column=column_count, padx=10, pady=10, sticky="nsew")
 
-            # Image
-            image = Image.open(r"C:\Users\linns\OneDrive\Desktop\Relational Database\GardenParadise\Data\cute-pot.png")
-            resize_image = image.resize((80, 80))  
-            img = ImageTk.PhotoImage(resize_image)  
+        # Image
+        image = Image.open(r"/Users/joaquingarcia/Documents/31305 Relational Databases/GardenParadise/Data/cute-pot.png")
+        resize_image = image.resize((80, 80))  # Resize to a larger size if 10x10 is too small
+        img = ImageTk.PhotoImage(resize_image)  # Use ImageTk.PhotoImage, not PhotoImage
 
             # Add the image to a Label
             image_label = Label(plant_frame, image=img, bg="lightgray")
@@ -277,9 +277,9 @@ def show_plants(plants):
             botanical_label = Label(plant_frame, text=f"{botanical_name}", font=("Arial", 12, "italic"), bg="lightgray")
             botanical_label.pack(anchor="center", padx=5, pady=2)
 
-            # More info Button
-            more_info_button = Button(plant_frame, text="More info", font=("Arial", 8), command=lambda : show_selected_plant(3))
-            more_info_button.pack(anchor="center", padx=5, pady=10)
+        # More info Button
+        more_info_button = Button(plant_frame, text="More info", font=("Arial", 8), command=lambda plant_id=plant_id: show_selected_plant({plant_id}))
+        more_info_button.pack(anchor="center", padx=5, pady=10)
 
 
 #Clear existing widgets in the scrollable frame and entry
