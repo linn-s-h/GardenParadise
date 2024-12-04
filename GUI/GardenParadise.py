@@ -132,7 +132,7 @@ title_label = Label(menu_frame, text="Garden Paradise", font=("Helvetica", 28, "
 title_label.pack(padx=20, pady=20, side="left")
 
 #Search frame content
-search_entry = Entry(search_frame)
+search_entry = Entry(search_frame, font=("Arial", 12))
 search_entry.grid(row=0, column=0, padx=(10, 10), pady=10, sticky="ew")  # Place in grid
 
 #Scrollbar
