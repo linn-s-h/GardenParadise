@@ -5,8 +5,8 @@ from PIL import Image, ImageTk
 
 DB_HOST = "localhost"
 DB_USER = "root"
-DB_PASSWORD = "36Cc7919!"
-DB_DATABASE = "garden_paradise"
+DB_PASSWORD = "Clownpokemon8"
+DB_DATABASE = "mydb"
 
 #Connection code 
 def connectDB():
@@ -178,7 +178,7 @@ def fetch_plant_results():
     mydb, cursor = connectDB()
     results = []
     query = """
-        SELECT `Common Name`, `Botanical Name`
+        SELECT `Common Name`, `Botanical Name`, `plant_id`
         FROM plants
         WHERE 1+1
     """
@@ -221,7 +221,7 @@ def show_selected_plant(plant_id):
     
     mydb.close()   
 
-    if TRUE:# plant_details:
+    if plant_details:# plant_details:
         plant_window = Toplevel()
         plant_window.title("")
         plant_window.geometry("600x500")
@@ -239,14 +239,14 @@ def show_selected_plant(plant_id):
 #GUI function that displays the plants after search in scrollable_frame
 def show_plants(plants):
 
-     for row_idx, (common_name, botanical_name) in enumerate(plants):
+     for row_idx, (common_name, botanical_name, plant_id) in enumerate(plants):
         column_count = row_idx % 2
         plant_frame = Frame(scrollable_frame, bg="lightgray", relief=SOLID, borderwidth=1, width=100, height=150)
         plant_frame.grid(row=row_idx // 2, column=column_count, padx=10, pady=10, sticky="ew")
         plant_frame.grid_propagate(False)  # Prevent resizing
 
         # Image
-        image = Image.open(r"C:\Users\linns\OneDrive\Desktop\Relational Database\GardenParadise\Data\cute-pot.png")
+        image = Image.open(r"/Users/joaquingarcia/Documents/31305 Relational Databases/GardenParadise/Data/cute-pot.png")
         resize_image = image.resize((80, 80))  # Resize to a larger size if 10x10 is too small
         img = ImageTk.PhotoImage(resize_image)  # Use ImageTk.PhotoImage, not PhotoImage
 
@@ -264,7 +264,7 @@ def show_plants(plants):
         botanical_label.pack(anchor="center", padx=5, pady=2)
 
         # More info Button
-        more_info_button = Button(plant_frame, text="More info", font=("Arial", 8), command=lambda : show_selected_plant(3))
+        more_info_button = Button(plant_frame, text="More info", font=("Arial", 8), command=lambda plant_id=plant_id: show_selected_plant({plant_id}))
         more_info_button.pack(anchor="center", padx=5, pady=10)
 
 
