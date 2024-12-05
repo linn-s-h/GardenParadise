@@ -49,37 +49,6 @@ def get_column_values(column_name):
     mydb.close()
     return values
 
-#Getting results from advanced search
-def fetch_plant_results():
-
-    mydb, cursor = connectDB()
-    results = []
-    query = """
-        SELECT `Common Name`, `Botanical Name`
-        FROM plants
-        WHERE 1+1
-    """
-
-    if dropdown_options[0].get():
-        query += " AND `Plant Type` = %s"
-        results.append(dropdown_options[0].get()) #Plant type dropdown
-    if dropdown_options[1].get():
-        query += " AND `Climate Zones` = %s"
-        results.append(dropdown_options[1].get()) #Climate zones dropdown
-    if dropdown_options[2].get():
-        query += " AND `Flower Colour` = %s"
-        results.append(dropdown_options[2].get()) #Flower colour dropdown
-    if dropdown_options[3].get():
-        query += f" AND `{dropdown_options[3].get()}` = 'Yes'" #Tolerance dropdown
-    if dropdown_options[4].get():
-        query += f" AND `{dropdown_options[4].get()}` = 'Yes'" #Attracting dropdown
-
-    query += " LIMIT 16;"
-    
-    cursor.execute(query, (tuple(results)))
-    values = cursor.fetchall()
-    mydb.close()
-    return values
 
 #Getting plant results from search bar entry
 def get_plants_by_search(plant_name):
@@ -206,7 +175,7 @@ def update_menu_buttons():
     if not logged_in:
         sign_up_button = Button(buttons_frame, text="Sign up", font=("Arial", 12), command=open_sign_up_screen)
         sign_up_button.pack(padx=10, pady=20, side="right")
-        login_button = Button(buttons_frame, text="Log in", font=("Arial", 12), command=open_login_screen)
+        login_button = Button(buttons_frame, text="Login", font=("Arial", 12), command=open_login_screen)
         login_button.pack(padx=10, pady=20, side="right")
     else:
         log_out_button = Button(buttons_frame, text="Log out", font=("Arial", 12), command=log_out)
@@ -311,7 +280,7 @@ def show_selected_plant(plant_id):
     query = """
     SELECT `Common Name`, `Botanical Name`, `Plant Type`, `Climate Zones`, `Flower Colour`
     FROM plants
-    WHERE `plant_id` = %s
+    WHERE `Plant ID` = %s
     """
     cursor.execute(query, (plant_id,))
     plant_details = cursor.fetchone()  # Fetch the details of the selected plant
@@ -347,7 +316,7 @@ def show_plants(plants):
             plant_frame.grid(row=row_idx // 3, column=column_count, padx=10, pady=10, sticky="nsew")
 
             # Image
-            image = Image.open(r"/Users/joaquingarcia/Documents/31305 Relational Databases/GardenParadise/Data/cute-pot.png")
+            image = Image.open(r"C:\Users\linns\OneDrive\Desktop\Relational Database\GardenParadise\Data\cute-pot.png")
             resize_image = image.resize((80, 80))  # Resize to a larger size if 10x10 is too small
             img = ImageTk.PhotoImage(resize_image)  # Use ImageTk.PhotoImage, not PhotoImage
 
@@ -360,9 +329,9 @@ def show_plants(plants):
             common_label = Label(plant_frame, text=f"{common_name}", font=("Arial", 12, "bold"), bg="lightgray")
             common_label.pack(anchor="center", padx=5, pady=2)
 
-        # Display botanical name
-        botanical_label = Label(plant_frame, text=f"{botanical_name}", font=("Arial", 12, "italic"), bg="lightgray")
-        botanical_label.pack(anchor="center", padx=5, pady=2)
+            # Display botanical name
+            botanical_label = Label(plant_frame, text=f"{botanical_name}", font=("Arial", 12, "italic"), bg="lightgray")
+            botanical_label.pack(anchor="center", padx=5, pady=2)
 
             # More info Button
             more_info_button = Button(plant_frame, text="More info", font=("Arial", 8), command=lambda plant_id=plant_id: show_selected_plant(plant_id))
