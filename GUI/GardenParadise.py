@@ -5,8 +5,8 @@ from PIL import Image, ImageTk
 
 DB_HOST = "localhost"
 DB_USER = "root"
-DB_PASSWORD = "Clownpokemon8"
-DB_DATABASE = "mydb"
+DB_PASSWORD = "36Cc7919!"
+DB_DATABASE = "garden_paradise"
 
 #Connection code 
 def connectDB():
@@ -131,6 +131,94 @@ result_frame.grid(row=1, column=1, sticky="nsew")
 title_label = Label(menu_frame, text="Garden Paradise", font=("Helvetica", 28, "bold"), bg="#06402B", fg="white")
 title_label.pack(padx=20, pady=20, side="left")
 
+buttons_frame = Frame(menu_frame, bg="#06402B")
+buttons_frame.pack(side="right", fill="y", padx=20)
+
+logged_in = False
+
+#Function that changes status of log in
+def change_login_status(status):
+    global logged_in 
+    logged_in = False
+    update_menu_buttons()
+
+#Function that opens a sign up screen
+def open_sign_up_screen():
+    sign_up_window = Toplevel()
+    sign_up_window.geometry("600x500")
+    sign_up_window.title("Signing up")
+
+#Function that opens a log in screen
+def open_login_screen():
+    login_window = Toplevel()
+    login_window.geometry("600x500")
+    login_window.title("Logging in") 
+
+    #Content of screen
+    main_frame = Frame(login_window, bg="#F2F0EF")
+    main_frame.place(relx=0, rely=0, relheight=0.9, relwidth=1, anchor="nw")  # Top-left alignment for main frame
+
+    bottom_frame = Frame(login_window, bg="#06402B")
+    bottom_frame.place(relx=0, rely=0.9, relheight=0.1, relwidth=1, anchor="nw")
+
+    main_container = Frame(main_frame, bg="#F2F0EF")
+    main_container.pack(expand=True)
+
+    sign_up_container = Frame(bottom_frame, bg="#06402B")
+    sign_up_container.pack(expand=True)
+
+    app_title = Label(main_container, text="Garden Paradise", font=("Helvetica", 24, "bold"), fg="#06402B")
+    app_title.pack(padx=10, pady=10, side="top")
+    login_title = Label(main_container, text="Login", font=("Arial", 12, "bold"))
+    login_title.pack(padx=10, pady=10, side="top")
+    username = Entry(main_container)
+    username.pack(padx=10, pady=10, side="top")
+    password = Entry(main_container)
+    password.pack(padx=10, pady=10, side="top")
+    login_button = Button(main_container, text="Login", font=("Arial", 10, "bold"), fg="white", bg="#06402B")
+    login_button.pack(padx=10, pady=10, side="top")
+
+    sign_up_text = Label(sign_up_container, text="Don't have an account yet?", font=("Arial", 10, "bold"), fg="white", bg="#06402B")
+    sign_up_text.pack(padx=10, pady=10, side="left")
+    sign_up_button = Button(sign_up_container, text="Sign up", font=("Arial", 10, "bold"), fg="#06402B", bg="white", command=open_sign_up_screen)
+    sign_up_button.pack(padx=10, pady=10, side="left")
+
+    #Change logged_in value to True
+    change_login_status(True)
+
+#Function that alters staus when logging out   
+def log_out():
+    change_login_status(False)
+
+#Function that opens favorites screen
+def open_favorites_screen():
+    favorites_window = Toplevel()
+    favorites_window.geometry("600x500")
+    favorites_window.title("Your favorites")
+
+#Function that updates the displayed menu buttons depending on the login status
+def update_menu_buttons():
+    """Update the buttons in the menu based on login status."""
+    global buttons_frame
+    for widget in buttons_frame.winfo_children(): 
+        widget.destroy() #Delete existing widgets 
+
+    if not logged_in:
+        sign_up_button = Button(buttons_frame, text="Sign up", font=("Arial", 12), command=open_sign_up_screen)
+        sign_up_button.pack(padx=10, pady=20, side="right")
+        login_button = Button(buttons_frame, text="Log in", font=("Arial", 12), command=open_login_screen)
+        login_button.pack(padx=10, pady=20, side="right")
+    else:
+        log_out_button = Button(buttons_frame, text="Log out", font=("Arial", 12), command=log_out)
+        log_out_button.pack(padx=10, pady=20, side="right")
+        favorites_button = Button(buttons_frame, text="Your favorites", font=("Arial", 12), command=open_favorites_screen)
+        favorites_button.pack(padx=10, pady=20, side="right")
+
+    welcome_label = Label(buttons_frame, text="Welcome", font=("Arial", 14), bg="#06402B", fg="white")
+    welcome_label.pack(padx=10, pady=10, side="right")
+
+update_menu_buttons()
+
 #Search frame content
 search_entry = Entry(search_frame, font=("Arial", 12))
 search_entry.grid(row=0, column=0, padx=(10, 10), pady=10, sticky="ew")  # Place in grid
@@ -188,7 +276,7 @@ def fetch_plant_results():
     mydb, cursor = connectDB()
     results = []
     query = """
-        SELECT `Common Name`, `Botanical Name`, `plant_id`
+        SELECT `Common Name`, `Botanical Name`, `Plant ID`
         FROM plants
         WHERE 1+1
     """
@@ -221,12 +309,11 @@ def show_selected_plant(plant_id):
     mydb, cursor = connectDB()
     
     query = """
-    SELECT `Common Name`, `Botanical Name`, `Plant Type`, `Climate Zones`, `Flower Colour`, 
-           `Tolerance`, `Attracting`, `Description`
+    SELECT `Common Name`, `Botanical Name`, `Plant Type`, `Climate Zones`, `Flower Colour`
     FROM plants
     WHERE `Plant ID` = %s
     """
-    cursor.execute(query, (plant_id))
+    cursor.execute(query, (f"{plant_id}"))
     plant_details = cursor.fetchone()  # Fetch the details of the selected plant
     
     mydb.close()   
@@ -254,28 +341,28 @@ def show_plants(plants):
         label.place(relx=0.5, rely=0.2, anchor="center")
         return
     else:
-        for row_idx, (common_name, botanical_name) in enumerate(plants):
+        for row_idx, (common_name, botanical_name, plant_id) in enumerate(plants):
             column_count = row_idx % 3
             plant_frame = Frame(scrollable_frame, bg="lightgray", relief=SOLID, borderwidth=1)
             plant_frame.grid(row=row_idx // 3, column=column_count, padx=10, pady=10, sticky="nsew")
 
         # Image
-        image = Image.open(r"/Users/joaquingarcia/Documents/31305 Relational Databases/GardenParadise/Data/cute-pot.png")
+        image = Image.open(r"C:\Users\linns\OneDrive\Desktop\Relational Database\GardenParadise\Data\cute-pot.png")
         resize_image = image.resize((80, 80))  # Resize to a larger size if 10x10 is too small
         img = ImageTk.PhotoImage(resize_image)  # Use ImageTk.PhotoImage, not PhotoImage
 
-            # Add the image to a Label
-            image_label = Label(plant_frame, image=img, bg="lightgray")
-            image_label.image = img  #Keep a reference to prevent garbage collection
-            image_label.pack(anchor="center", padx=5, pady=5)
-            
-            # Display common name
-            common_label = Label(plant_frame, text=f"{common_name}", font=("Arial", 12, "bold"), bg="lightgray")
-            common_label.pack(anchor="center", padx=5, pady=2)
+        # Add the image to a Label
+        image_label = Label(plant_frame, image=img, bg="lightgray")
+        image_label.image = img  #Keep a reference to prevent garbage collection
+        image_label.pack(anchor="center", padx=5, pady=5)
+        
+        # Display common name
+        common_label = Label(plant_frame, text=f"{common_name}", font=("Arial", 12, "bold"), bg="lightgray")
+        common_label.pack(anchor="center", padx=5, pady=2)
 
-            # Display botanical name
-            botanical_label = Label(plant_frame, text=f"{botanical_name}", font=("Arial", 12, "italic"), bg="lightgray")
-            botanical_label.pack(anchor="center", padx=5, pady=2)
+        # Display botanical name
+        botanical_label = Label(plant_frame, text=f"{botanical_name}", font=("Arial", 12, "italic"), bg="lightgray")
+        botanical_label.pack(anchor="center", padx=5, pady=2)
 
         # More info Button
         more_info_button = Button(plant_frame, text="More info", font=("Arial", 8), command=lambda plant_id=plant_id: show_selected_plant({plant_id}))
