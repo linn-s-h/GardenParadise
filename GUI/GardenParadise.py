@@ -54,7 +54,7 @@ def get_column_values(column_name):
 def get_plants_by_search(plant_name):
     mydb, cursor = connectDB()
     query = """
-    SELECT `Common Name`, `Botanical Name`
+    SELECT `Common Name`, `Botanical Name`, `Plant ID`
     FROM plants
     WHERE `Common Name` LIKE %s OR `Botanical Name` LIKE %s
     ORDER BY `Common Name` ASC
