@@ -5,8 +5,8 @@ from PIL import Image, ImageTk
 
 DB_HOST = "localhost"
 DB_USER = "root"
-DB_PASSWORD = "36Cc7919!"
-DB_DATABASE = "garden_paradise"
+DB_PASSWORD = "Clownpokemon8"
+DB_DATABASE = "mydb"
 
 #Connection code 
 def connectDB():
@@ -54,7 +54,7 @@ def get_column_values(column_name):
 def get_plants_by_search(plant_name):
     mydb, cursor = connectDB()
     query = """
-    SELECT `Common Name`, `Botanical Name`, `Plant ID`
+    SELECT `Common Name`, `Botanical Name`, `plant_id`
     FROM plants
     WHERE `Common Name` LIKE %s OR `Botanical Name` LIKE %s
     ORDER BY `Common Name` ASC
@@ -245,7 +245,7 @@ def fetch_plant_results():
     mydb, cursor = connectDB()
     results = []
     query = """
-        SELECT `Common Name`, `Botanical Name`, `Plant ID`
+        SELECT `Common Name`, `Botanical Name`, `plant_id`
         FROM plants
         WHERE 1+1
     """
@@ -280,7 +280,7 @@ def show_selected_plant(plant_id):
     query = """
     SELECT `Common Name`, `Botanical Name`, `Plant Type`, `Climate Zones`, `Flower Colour`
     FROM plants
-    WHERE `Plant ID` = %s
+    WHERE `plant_id` = %s
     """
     cursor.execute(query, (plant_id,))
     plant_details = cursor.fetchone()  # Fetch the details of the selected plant
@@ -291,6 +291,10 @@ def show_selected_plant(plant_id):
         plant_window = Toplevel()
         plant_window.title("")
         plant_window.geometry("600x500")
+
+        # left frame
+        left_frame = Frame(plant_window)
+        left_frame.pack(padx=10, side="left", fill="y", )
        
        # Display the details in the new window
         common_name_label = Label(plant_window, text=f"Common Name: {plant_details[0]}", font=("Arial", 14))
@@ -316,7 +320,7 @@ def show_plants(plants):
             plant_frame.grid(row=row_idx // 3, column=column_count, padx=10, pady=10, sticky="nsew")
 
             # Image
-            image = Image.open(r"C:\Users\linns\OneDrive\Desktop\Relational Database\GardenParadise\Data\cute-pot.png")
+            image = Image.open(r"/Users/joaquingarcia/Documents/31305 Relational Databases/GardenParadise/Data/cute-pot.png")
             resize_image = image.resize((80, 80))  # Resize to a larger size if 10x10 is too small
             img = ImageTk.PhotoImage(resize_image)  # Use ImageTk.PhotoImage, not PhotoImage
 
