@@ -221,12 +221,11 @@ def show_selected_plant(plant_id):
     mydb, cursor = connectDB()
     
     query = """
-    SELECT `Common Name`, `Botanical Name`, `Plant Type`, `Climate Zones`, `Flower Colour`, 
-           `Tolerance`, `Attracting`, `Description`
+    SELECT `Common Name`, `Botanical Name`, `Plant Type`, `Climate Zones`, `Flower Colour`
     FROM plants
-    WHERE `Plant ID` = %s
+    WHERE `plant_id` = %s
     """
-    cursor.execute(query, (plant_id))
+    cursor.execute(query, (plant_id,))
     plant_details = cursor.fetchone()  # Fetch the details of the selected plant
     
     mydb.close()   
@@ -254,21 +253,21 @@ def show_plants(plants):
         label.place(relx=0.5, rely=0.2, anchor="center")
         return
     else:
-        for row_idx, (common_name, botanical_name) in enumerate(plants):
+        for row_idx, (common_name, botanical_name, plant_id) in enumerate(plants):
             column_count = row_idx % 3
             plant_frame = Frame(scrollable_frame, bg="lightgray", relief=SOLID, borderwidth=1)
             plant_frame.grid(row=row_idx // 3, column=column_count, padx=10, pady=10, sticky="nsew")
 
-        # Image
-        image = Image.open(r"/Users/joaquingarcia/Documents/31305 Relational Databases/GardenParadise/Data/cute-pot.png")
-        resize_image = image.resize((80, 80))  # Resize to a larger size if 10x10 is too small
-        img = ImageTk.PhotoImage(resize_image)  # Use ImageTk.PhotoImage, not PhotoImage
+            # Image
+            image = Image.open(r"/Users/joaquingarcia/Documents/31305 Relational Databases/GardenParadise/Data/cute-pot.png")
+            resize_image = image.resize((80, 80))  # Resize to a larger size if 10x10 is too small
+            img = ImageTk.PhotoImage(resize_image)  # Use ImageTk.PhotoImage, not PhotoImage
 
             # Add the image to a Label
             image_label = Label(plant_frame, image=img, bg="lightgray")
             image_label.image = img  #Keep a reference to prevent garbage collection
             image_label.pack(anchor="center", padx=5, pady=5)
-            
+                
             # Display common name
             common_label = Label(plant_frame, text=f"{common_name}", font=("Arial", 12, "bold"), bg="lightgray")
             common_label.pack(anchor="center", padx=5, pady=2)
@@ -277,9 +276,9 @@ def show_plants(plants):
             botanical_label = Label(plant_frame, text=f"{botanical_name}", font=("Arial", 12, "italic"), bg="lightgray")
             botanical_label.pack(anchor="center", padx=5, pady=2)
 
-        # More info Button
-        more_info_button = Button(plant_frame, text="More info", font=("Arial", 8), command=lambda plant_id=plant_id: show_selected_plant({plant_id}))
-        more_info_button.pack(anchor="center", padx=5, pady=10)
+            # More info Button
+            more_info_button = Button(plant_frame, text="More info", font=("Arial", 8), command=lambda plant_id=plant_id: show_selected_plant(plant_id))
+            more_info_button.pack(anchor="center", padx=5, pady=10)
 
 
 #Clear existing widgets in the scrollable frame and entry
