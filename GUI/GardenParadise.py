@@ -65,6 +65,18 @@ def get_plants_by_search(plant_name):
     mydb.close()
     return values
 
+def get_image_path(plant_id):
+    mydb, cursor = connectDB()
+    query = """
+    SELECT img.`Image Location`
+    FROM images img
+    JOIN plants p ON p.`Image ID` = img.`Image ID`
+    WHERE p.`Plant ID` LIKE %s
+    """
+    cursor.execute(query, (f"{plant_id}"))
+    value = mydb.close()
+    return value
+
 
 
 ###############################################################
@@ -314,9 +326,11 @@ def show_plants(plants):
             column_count = row_idx % 3
             plant_frame = Frame(scrollable_frame, bg="lightgray", relief=SOLID, borderwidth=1)
             plant_frame.grid(row=row_idx // 3, column=column_count, padx=10, pady=10, sticky="nsew")
+            plant_frame.config(width=230, height=230)
+            plant_frame.propagate(False)
 
             # Image
-            image = Image.open(r"C:\Users\linns\OneDrive\Desktop\Relational Database\GardenParadise\Data\cute-pot.png")
+            image = Image.open(r"C:\Users\linns\OneDrive\Desktop\Relational Database\GardenParadise\Data\plants\orchid\orchid_yellow.png")
             resize_image = image.resize((80, 80))  # Resize to a larger size if 10x10 is too small
             img = ImageTk.PhotoImage(resize_image)  # Use ImageTk.PhotoImage, not PhotoImage
 
@@ -326,11 +340,11 @@ def show_plants(plants):
             image_label.pack(anchor="center", padx=5, pady=5)
                 
             # Display common name
-            common_label = Label(plant_frame, text=f"{common_name}", font=("Arial", 12, "bold"), bg="lightgray")
+            common_label = Label(plant_frame, text=f"{common_name}", font=("Arial", 11, "bold"), bg="lightgray")
             common_label.pack(anchor="center", padx=5, pady=2)
 
             # Display botanical name
-            botanical_label = Label(plant_frame, text=f"{botanical_name}", font=("Arial", 12, "italic"), bg="lightgray")
+            botanical_label = Label(plant_frame, text=f"{botanical_name}", font=("Arial", 11, "italic"), bg="lightgray")
             botanical_label.pack(anchor="center", padx=5, pady=2)
 
             # More info Button
