@@ -5,8 +5,8 @@ from PIL import Image, ImageTk
 
 DB_HOST = "localhost"
 DB_USER = "root"
-DB_PASSWORD = "Clownpokemon8"
-DB_DATABASE = "mydb"
+DB_PASSWORD = "36Cc7919!"
+DB_DATABASE = "garden_paradise"
 
 #Connection code 
 def connectDB():
@@ -54,7 +54,7 @@ def get_column_values(column_name):
 def get_plants_by_search(plant_name):
     mydb, cursor = connectDB()
     query = """
-    SELECT `Common Name`, `Botanical Name`, `plant_id`
+    SELECT `Common Name`, `Botanical Name`, `Plant ID`
     FROM plants
     WHERE `Common Name` LIKE %s OR `Botanical Name` LIKE %s
     ORDER BY `Common Name` ASC
@@ -257,7 +257,7 @@ def fetch_plant_results():
     mydb, cursor = connectDB()
     results = []
     query = """
-        SELECT `Common Name`, `Botanical Name`, `plant_id`
+        SELECT `Common Name`, `Botanical Name`, `Plant ID`
         FROM plants
         WHERE 1+1
     """
@@ -292,7 +292,7 @@ def show_selected_plant(plant_id):
     query = """
     SELECT `Common Name`, `Botanical Name`, `Plant Type`, `Climate Zones`, `Flower Colour`
     FROM plants
-    WHERE `plant_id` = %s
+    WHERE `Plant ID` = %s
     """
     cursor.execute(query, (plant_id,))
     plant_details = cursor.fetchone()  # Fetch the details of the selected plant
@@ -335,7 +335,7 @@ def show_selected_plant(plant_id):
 
 
         # Image
-        image = Image.open(r"/Users/joaquingarcia/Documents/31305 Relational Databases/GardenParadise/Data/cute-pot.png")
+        image = Image.open(r"C:\Users\linns\OneDrive\Desktop\Relational Database\GardenParadise\Data\plants\orchid\orchid_yellow.png")
         resize_image = image.resize((100, 100))  # Resize to a larger size if 10x10 is too small
         img = ImageTk.PhotoImage(resize_image)  # Use ImageTk.PhotoImage, not PhotoImage
 
