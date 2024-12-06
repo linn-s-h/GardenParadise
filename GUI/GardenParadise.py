@@ -290,18 +290,77 @@ def show_selected_plant(plant_id):
     if plant_details:# plant_details:
         plant_window = Toplevel()
         plant_window.title("")
-        plant_window.geometry("600x500")
+        plant_window.geometry("700x500")
 
         # left frame
-        left_frame = Frame(plant_window)
-        left_frame.pack(padx=10, side="left", fill="y", )
-       
-       # Display the details in the new window
-        common_name_label = Label(plant_window, text=f"Common Name: {plant_details[0]}", font=("Arial", 14))
-        common_name_label.pack(pady=10)
+        left_frame = Frame(plant_window, bg="#06402B")
+        left_frame.place(relx=0, rely=0, relwidth=0.3, relheight=1)
 
-        botanical_name_label = Label(plant_window, text=f"Botanical Name: {plant_details[1]}", font=("Arial", 14))
-        botanical_name_label.pack(pady=10)
+        # Display the details in the left frame
+        # Add favourites button
+        def add_to_favorites():
+            # Add logic to save the current plant to favorites
+            print("Plant added to favorites!")
+
+        add_to_favorites_button = Button(
+            left_frame,
+            text="Add to Favorites",
+            font=("Arial", 12, "bold"),
+            bg="#FF6347",  # Tomato red background
+            fg="white",  # White text
+            activebackground="#FF4500",  # Slightly darker red when pressed
+            activeforeground="white",
+            relief="raised",  # Button effect
+            borderwidth=2,  # Border thickness
+            command=add_to_favorites  # Function to handle button click
+        )
+        add_to_favorites_button.pack(
+            side="bottom",  # Pack at the bottom
+            pady=20,  # Add vertical padding
+            padx=10,  # Add horizontal padding
+            fill="x"  # Make it stretch horizontally
+        )
+
+
+        # Image
+        image = Image.open(r"/Users/joaquingarcia/Documents/31305 Relational Databases/GardenParadise/Data/cute-pot.png")
+        resize_image = image.resize((100, 100))  # Resize to a larger size if 10x10 is too small
+        img = ImageTk.PhotoImage(resize_image)  # Use ImageTk.PhotoImage, not PhotoImage
+
+        # Add the image to a Label
+        image_label = Label(left_frame, image=img, bg="white")
+        image_label.image = img  #Keep a reference to prevent garbage collection
+        image_label.pack(anchor="center", padx=5, pady=30)
+
+        common_name = Label(left_frame, text=f"Common Name", font=("Arial", 13, "bold"), fg="white", bg=left_frame["bg"]) # so frame inherits bg colour
+        common_name.pack(pady=5)
+
+        common_name_label = Label(left_frame, text=f"{plant_details[0]}", font=("Arial", 12), fg="white", bg=left_frame["bg"])
+        common_name_label.pack(pady=5)
+
+        botanical_name = Label(left_frame, text=f"Botanical Name", font=("Arial", 13, "bold"), fg="white", bg=left_frame["bg"])
+        botanical_name.pack(pady=5)
+        
+        botanical_name_label = Label(left_frame, text=f"{plant_details[1]}", font=("Arial", 12), fg="white", bg=left_frame["bg"])
+        botanical_name_label.pack(pady=5)
+
+        plant_type = Label(left_frame, text=f"Plant Type", font=("Arial", 13, "bold"), fg="white", bg=left_frame["bg"])
+        plant_type.pack(pady=5)
+        
+        plant_type_label = Label(left_frame, text=f"{plant_details[2]}", font=("Arial", 12), fg="white", bg=left_frame["bg"])
+        plant_type_label.pack(pady=5)
+
+        # right frame
+        right_frame = Frame(plant_window, bg="white")
+        right_frame.place(relx=0.3, rely=0, relwidth=0.7, relheight=1)
+
+        climate_zone = Label(right_frame, text=f"Climate Zone", font=("Arial", 13, "bold"), fg="white", bg=left_frame["bg"])
+        climate_zone.pack(pady=5)
+        
+        climate_zone_label = Label(right_frame, text=f"{plant_details[3]}", font=("Arial", 12), fg="white", bg=left_frame["bg"])
+        climate_zone_label.pack(pady=5)
+       
+       
     else:
         print("No details found for this plant.")
 
