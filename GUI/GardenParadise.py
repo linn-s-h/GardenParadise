@@ -278,9 +278,9 @@ def show_selected_plant(plant_id):
     mydb, cursor = connectDB()
     
     query = """
-    SELECT `Common Name`, `Botanical Name`, `Plant Type`, `Climate Zones`, `Flower Colour`
+    SELECT `Common Name`, `Botanical Name`, `Plant Type`, `Climate Zones`, `Flower Colour`, `Water Needs`, `Light Needs`, `Soil Type`, `Maintenance`, `Foliage Colour`, `Perfume`, `Aromatic`, `Edible`, `Notes`
     FROM plants
-    WHERE `plant_id` = %s
+    WHERE `plant_id` = %s;
     """
     cursor.execute(query, (plant_id,))
     plant_details = cursor.fetchone()  # Fetch the details of the selected plant
@@ -354,110 +354,20 @@ def show_selected_plant(plant_id):
         right_frame = Frame(plant_window, bg="white")
         right_frame.place(relx=0.3, rely=0, relwidth=0.7, relheight=1)
 
-        climate_zone = Label(right_frame, text=f"Climate Zone", font=("Arial", 13, "bold"), fg="white", bg=left_frame["bg"])
-        climate_zone.pack(pady=5)
-        
-        climate_zone_label = Label(right_frame, text=f"{plant_details[3]}", font=("Arial", 12), fg="white", bg=left_frame["bg"])
-        climate_zone_label.pack(pady=5)
-       
-       
-    else:
-        print("No details found for this plant.")
+        # Create the top frame for "Maintenance Information"
+        top_frame = Frame(right_frame, bg="grey", bd=2, relief="solid")  # Border with grey background
+        top_frame.pack(fill="x", padx=10, pady=10, expand=False)
 
+        # Add the label to the top frame
+        top_label = Label(top_frame, text="Maintenance Information", font=("Arial", 14, "bold"), bg="grey")
+        top_label.pack(pady=5, padx=10)
 
-#GUI function that displays the plants after search in scrollable_frame
-def show_plants(plants):
+        maintenance_info_frame = Frame(right_frame, bg=right_frame["bg"])
+        maintenance_info_frame.pack(fill="x", padx=10, pady=10)
 
-    if not plants:
-        label = Label(scrollable_frame, text="No products were found matching your selection.", font=("Arial", 12), bg="white")
-        label.place(relx=0.5, rely=0.2, anchor="center")
-        return
-    else:
-        for row_idx, (common_name, botanical_name, plant_id) in enumerate(plants):
-            column_count = row_idx % 3
-            plant_frame = Frame(scrollable_frame, bg="lightgray", relief=SOLID, borderwidth=1)
-            plant_frame.grid(row=row_idx // 3, column=column_count, padx=10, pady=10, sticky="nsew")
+        # Create the labels and info pairs in a grid layout
+        # Row 1 - "Climate Zone" title and info label
+        climate_zone = Label(maintenance_info_frame, text="Climate Zone", font=("Arial", 13, "bold"), fg="black", bg=right_frame["bg"]) #make any commas separated with a space
+        climate_zone.grid(row=0, column=0, padx=10, pady=5, sticky="w")  # Title in the first row
 
-            # Image
-            image = Image.open(r"/Users/joaquingarcia/Documents/31305 Relational Databases/GardenParadise/Data/cute-pot.png")
-            resize_image = image.resize((80, 80))  # Resize to a larger size if 10x10 is too small
-            img = ImageTk.PhotoImage(resize_image)  # Use ImageTk.PhotoImage, not PhotoImage
-
-            # Add the image to a Label
-            image_label = Label(plant_frame, image=img, bg="lightgray")
-            image_label.image = img  #Keep a reference to prevent garbage collection
-            image_label.pack(anchor="center", padx=5, pady=5)
-                
-            # Display common name
-            common_label = Label(plant_frame, text=f"{common_name}", font=("Arial", 12, "bold"), bg="lightgray")
-            common_label.pack(anchor="center", padx=5, pady=2)
-
-            # Display botanical name
-            botanical_label = Label(plant_frame, text=f"{botanical_name}", font=("Arial", 12, "italic"), bg="lightgray")
-            botanical_label.pack(anchor="center", padx=5, pady=2)
-
-            # More info Button
-            more_info_button = Button(plant_frame, text="More info", font=("Arial", 8), command=lambda plant_id=plant_id: show_selected_plant(plant_id))
-            more_info_button.pack(anchor="center", padx=5, pady=10)
-
-
-#Clear existing widgets in the scrollable frame and entry
-def clear_entry_and_frame():
-    for widget in scrollable_frame.winfo_children():
-        widget.destroy()
-    search_entry.delete(0, 'end')
-
-def clear_frame():
-    for widget in scrollable_frame.winfo_children():
-        widget.destroy()
-    for i in range(len(dropdown_labels)):
-        dropdown_options[i].set("")
-
-def clear_all_search(): 
-    clear_entry_and_frame() 
-    for i in range(len(dropdown_labels)):
-        dropdown_options[i].set("")
-
-#Showing advanced search results
-def show_advanced_search():
-
-    clear_entry_and_frame()
-    plants = fetch_plant_results()
-    show_plants(plants)
-
-def show_entry_search(event=None):
-
-    clear_frame()
-    plant_name = search_entry.get().strip()
-    plants = get_plants_by_search(plant_name)
-    show_plants(plants)
-
-#Find plant search button
-find_plant_button = Button(search_frame, text="Find plant", font=("Arial", 12), command=show_advanced_search)
-find_plant_button.grid(padx=10, pady=10)
-
-clear_button = Button(search_frame, text="Clear all", font=("Arial", 12, "bold"), bg="#06402B", fg="white", command=clear_all_search)
-clear_button.place(relx=0.5, rely=0.95, anchor="s")
-
-#Search plant button
-search_button = Button(search_frame, text="Search", font=("Arial", 12), command=show_entry_search)
-search_button.grid(row=1, column=0, padx=(10, 10), pady=10)  # Place next to entry
-search_entry.bind('<Return>', show_entry_search)
-
-
-
-window.mainloop()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        climate_zone_label = Label(mai
