@@ -2,11 +2,15 @@ import mysql.connector
 from tkinter import *
 from tkinter import PhotoImage
 from PIL import Image, ImageTk
+import os
 
 DB_HOST = "localhost"
 DB_USER = "root"
 DB_PASSWORD = "36Cc7919!"
 DB_DATABASE = "garden_paradise"
+
+#For retrieving image path from OS
+BASE_IMAGE_DIR = r"C:\Users\linns\OneDrive\Desktop\Relational Database\GardenParadise\Data"
 
 #Connection code 
 def connectDB():
@@ -73,11 +77,17 @@ def get_image_path(plant_id):
     JOIN plants p ON p.`Image ID` = img.`Image ID`
     WHERE p.`Plant ID` LIKE %s
     """
-    cursor.execute(query, (f"{plant_id}"))
-    value = mydb.close()
-    return value
-
-
+    cursor.execute(query, (f"{plant_id}",))
+    value = cursor.fetchone()
+    try:
+        if value:
+            relative_path = value[0].strip()  # Get the relative path from the database
+            full_path = os.path.join(BASE_IMAGE_DIR, relative_path)  # Combine base directory with relative path
+            return full_path
+        else:
+            return None
+    finally:
+        mydb.close()
 
 ###############################################################
 
@@ -335,9 +345,11 @@ def show_selected_plant(plant_id):
 
 
         # Image
-        image = Image.open(r"C:\Users\linns\OneDrive\Desktop\Relational Database\GardenParadise\Data\plants\orchid\orchid_yellow.png")
-        resize_image = image.resize((100, 100))  # Resize to a larger size if 10x10 is too small
-        img = ImageTk.PhotoImage(resize_image)  # Use ImageTk.PhotoImage, not PhotoImage
+        path = get_image_path(plant_id)
+        image = Image.open(path)
+        #print(f"Retrieved path for Plant ID {plant_id}: {path}")
+        resize_image = image.resize((100, 100)) 
+        img = ImageTk.PhotoImage(resize_image) 
 
         # Add the image to a Label
         image_label = Label(left_frame, image=img, bg="white")
@@ -533,9 +545,11 @@ def show_plants(plants):
             plant_frame.propagate(False)
 
             # Image
-            image = Image.open(r"C:\Users\linns\OneDrive\Desktop\Relational Database\GardenParadise\Data\cute-pot.png")
-            resize_image = image.resize((80, 80))  # Resize to a larger size if 10x10 is too small
-            img = ImageTk.PhotoImage(resize_image)  # Use ImageTk.PhotoImage, not PhotoImage
+            path = get_image_path(plant_id)
+            image = Image.open(path)
+            #print(f"Retrieved path for Plant ID {plant_id}: {path}")
+            resize_image = image.resize((80, 80)) 
+            img = ImageTk.PhotoImage(resize_image)  
 
             # Add the image to a Label
             image_label = Label(plant_frame, image=img, bg="lightgray")
