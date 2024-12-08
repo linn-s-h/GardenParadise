@@ -1,5 +1,5 @@
 import mysql.connector
-import config
+import App.config as config
 import os
 from tkinter import *
 from tkinter import PhotoImage
@@ -13,6 +13,8 @@ user_id = None
 favorites_window = None
 favorites_frame = None
 
+BASE_IMAGE_DIR = r"C:\Users\linns\OneDrive\Desktop\Relational Database\GardenParadise\Data"
+
 #Connection code 
 def connectDB():
     mydb = mysql.connector.connect(
@@ -25,19 +27,19 @@ def connectDB():
     mycursor = mydb.cursor()
     return mydb, mycursor
 
-#################################  SQL STATEMENTS  #####################################
-
 #Function to fetch distinct values from specified column in the plants table
 def get_distinct_values(column_name):
     mydb, cursor = connectDB()
-    query = f"""
-        SELECT {column_name}, COUNT(*)
-        FROM plants
-        GROUP BY {column_name}
-        ORDER BY {column_name} ASC
-    """
-    cursor.execute(query)
-    values = [f"{row[0]} ({row[1]})" for row in cursor.fetchall()]
+    cursor.execute(f"SELECT DISTINCT {column_name} FROM plants GROUP BY {column_name} ORDER BY {column_name} ASC")
+    values = [row[0] for row in cursor.fetchall()]
+    mydb.close()
+    return values
+
+#Function to fetch the count of each distinct value
+def get_distinct_values_count(column_name):
+    mydb, cursor = connectDB()
+    cursor.execute(f"SELECT COUNT({column_name}), (SELECT DISTINCT {column_name}) FROM plants GROUP BY {column_name};")
+    values = [row[0] for row in cursor.fetchall()]
     mydb.close()
     return values
 
@@ -70,7 +72,6 @@ def get_plants_by_search(plant_name):
     mydb.close()
     return values
 
-#Function that retrieves image path belonging to a plant
 def get_image_path(plant_id):
     mydb, cursor = connectDB()
     query = """
@@ -91,75 +92,9 @@ def get_image_path(plant_id):
     finally:
         mydb.close()
 
+###############################################################
 
-#Getting results from advanced search
-def fetch_plant_results():
-
-    mydb, cursor = connectDB()
-    results = []
-    query = """
-        SELECT `Common Name`, `Botanical Name`, `Plant ID`
-        FROM plants
-        WHERE 1+1
-    """
-
-    if dropdown_options[0].get():
-        query += " AND `Plant Type` = %s"
-        results.append(extract_raw_value(dropdown_options[0].get())) #Plant type dropdown
-    if dropdown_options[1].get():
-        query += " AND `Climate Zones` = %s"
-        results.append(extract_raw_value(dropdown_options[1].get())) #Climate zones dropdown
-    if dropdown_options[2].get():
-        query += " AND `Flower Colour` = %s"
-        results.append(extract_raw_value(dropdown_options[2].get())) #Flower colour dropdown
-    if dropdown_options[3].get():
-        query += f" AND `{dropdown_options[3].get()}` != 'Unknown'" #Tolerance dropdown #Can be Yes, Light, Medium, High
-    if dropdown_options[4].get():
-        query += f" AND `{dropdown_options[4].get()}` = 'Yes'" #Attracting dropdown
-
-    query += " LIMIT 16;"
-    
-    cursor.execute(query, (tuple(results)))
-    result = cursor.fetchall()
-    mydb.close()
-
-    return result
-
-#To get favourites linked to an user
-def get_user_favorites(user_id):
-    mydb, cursor = connectDB()
-    
-    query = """
-    SELECT p.`Common Name`, p.`Botanical Name`, p.`Plant ID`
-    FROM favourites f
-    JOIN plants p ON f.`Plant ID` = p.`Plant ID`
-    WHERE f.`User ID` = %s ORDER BY f.added_date DESC LIMIT 9;
-    """
-    cursor.execute(query, (user_id,))
-    plants = cursor.fetchall()  # Fetch the details of the selected plant
-    
-    mydb.close()
-    return plants
-
-#Fetch details for the selected plant
-def get_plant_details(plant_id):
-    mydb, cursor = connectDB()
-    
-    query = """
-    SELECT `Common Name`, `Botanical Name`, `Plant Type`, `Climate Zones`, 
-    `Flower Colour`, `Water Needs`, `Light Needs`, `Soil Type`, `Maintenance`, 
-    `Foliage Colour`, `Perfume`, `Aromatic`, `Edible`, `Notes`
-    FROM plants
-    WHERE `Plant ID` = %s
-    """
-    cursor.execute(query, (plant_id,))
-    plant_details = cursor.fetchone()  # Fetch the details of the selected plant
-    
-    mydb.close() 
-    return plant_details  
-
-#############################  GUI  ##################################
-
+#GUI
 window = Tk()
 window.geometry("1050x800")
 window.title("Garden Paradise")
@@ -215,7 +150,7 @@ def sign_up_user(username, first_name, last_name, password, confirm_password, si
         mydb, cursor = connectDB()
 
         # Check if username already exists
-        cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
+        cursor.execute("SELECT * FROM users WHERE username=%s", (username,))
         existing_user=cursor.fetchone()
 
         if existing_user:
@@ -405,19 +340,8 @@ def open_login_screen():
     username_entry.bind("<FocusOut>", on_username_blur)
     password_entry.bind("<FocusOut>", on_password_blur)
 
-    username_entry.bind(
-        '<Return>', 
-        lambda event: validate_login(username_entry.get(), password_entry.get(), login_window)
-    )
-    password_entry.bind(
-        '<Return>', 
-        lambda event: validate_login(username_entry.get(), password_entry.get(), login_window)
-    )
-
-    login_button = Button(main_container, text="Login", font=("Arial", 10, "bold"), fg="white", bg="#06402B", command=lambda: validate_login(username_entry.get(),password_entry.get(), login_window))
+    login_button = Button(main_container, text="Login", font=("Arial", 10, "bold"), fg="white", bg="#06402B", command=lambda:validate_login(username_entry.get(),password_entry.get(), login_window))
     login_button.pack(padx=10, pady=10, side="top")
-
-    login_button.bind('<Return>', lambda event:validate_login(username_entry.get(),password_entry.get(), login_window))
 
     sign_up_text = Label(sign_up_container, text="Don't have an account yet?", font=("Arial", 10, "bold"), fg="white", bg="#06402B")
     sign_up_text.pack(padx=10, pady=10, side="left")
@@ -438,6 +362,104 @@ def log_out():
         favorites_window.destroy()
     messagebox.showinfo("Logged Out", "You have successfully logged out.")
     update_menu_buttons()
+
+#Function that opens favorites screen
+def open_favorites_screen():
+    global favorites_window, favorites_frame
+
+    if favorites_window and favorites_window.winfo_exists():
+        favorites_window.lift()
+        refresh_favorites()
+        return
+
+    # Create a new favorites window
+    favorites_window = Toplevel()
+    favorites_window.geometry("550x550")
+    favorites_window.title(f"{user_first_name} {user_last_name}'s favorites")
+
+    # Create a frame inside the window to hold the favorite plants
+    favorites_frame = Frame(favorites_window, bg="white", relief=SOLID, borderwidth=1)
+    favorites_frame.pack(fill="both", expand=True, padx=10, pady=10)
+
+    display_favorites(favorites_frame)
+
+# Function to display favorites in any frame
+def display_favorites(parent_frame):
+    # Clear the frame
+    for widget in parent_frame.winfo_children():
+        widget.destroy()
+
+    # Get user favorites
+    user_favorites = get_user_favorites(user_id)
+
+    # Show favorite plants
+    show_favourite_plants(parent_frame, user_favorites)
+
+#Function that refreshes the favorite window
+def refresh_favorites():
+    # print("Refresh called successfully")
+    if not favorites_window or not favorites_window.winfo_exists():
+        return
+    
+    for widget in favorites_frame.winfo_children():
+        widget.destroy()
+    
+    user_favorites = get_user_favorites(user_id)
+
+    show_favourite_plants(favorites_frame, user_favorites)
+
+
+def get_user_favorites(user_id):
+    mydb, cursor = connectDB()
+    
+    query = """
+    SELECT p.`Common Name`, p.`Botanical Name`, p.`Plant ID`
+    FROM favourites f
+    JOIN plants p ON f.`Plant ID` = p.`Plant ID`
+    WHERE f.`User ID` = %s ORDER BY f.added_date DESC LIMIT 9;
+    """
+    cursor.execute(query, (user_id,))
+    plants = cursor.fetchall()  # Fetch the details of the selected plant
+    
+    mydb.close()
+    return plants
+
+def show_favourite_plants(parent_frame, plants):
+    if not plants:
+        label = Label(parent_frame, text="No favorite plants added.", font=("Arial", 12), bg=favorites_window["bg"])
+        label.place(relx=0.5, rely=0.2, anchor="center")
+        return
+    else:
+        for row_idx, (common_name, botanical_name, plant_id) in enumerate(plants):
+            column_count = row_idx % 3
+            plant_frame = Frame(parent_frame, bg="lightgray", relief=SOLID, borderwidth=1)
+            plant_frame.grid(row=row_idx // 3, column=column_count, padx=10, pady=10, sticky="nsew")
+            plant_frame.config(width=150, height=150)
+            plant_frame.propagate(False)
+
+            # Image
+            path = get_image_path(plant_id)
+            image = Image.open(path)
+            #print(f"Retrieved path for Plant ID {plant_id}: {path}")
+            resize_image = image.resize((60, 60)) 
+            img = ImageTk.PhotoImage(resize_image)  
+
+            # Add the image to a Label
+            image_label = Label(plant_frame, image=img, bg="lightgray")
+            image_label.image = img  #Keep a reference to prevent garbage collection
+            image_label.pack(anchor="center", padx=5, pady=5)
+                
+            # Display common name
+            common_label = Label(plant_frame, text=f"{common_name}", font=("Arial", 11, "bold"), bg="lightgray")
+            common_label.pack(anchor="center", padx=5, pady=2)
+
+            # Display botanical name
+            botanical_label = Label(plant_frame, text=f"{botanical_name}", font=("Arial", 11, "italic"), bg="lightgray")
+            botanical_label.pack(anchor="center", padx=5, pady=2)
+
+            # More info Button
+            more_info_button = Button(plant_frame, text="More info", font=("Arial", 8), command=lambda plant_id=plant_id: show_selected_plant(plant_id))
+            more_info_button.pack(anchor="center", padx=5, pady=10)
 
 
 #Function that updates the displayed menu buttons depending on the login status
@@ -518,23 +540,59 @@ for i in range(len(dropdown_labels)):
     dropdown.config(width=20, bg="white")
     dropdown.grid(row=4 + (2 * i), column=0, padx=10, pady=(0, 20), sticky="ew")
 
+#start here
+#Getting results from advanced search
+def fetch_plant_results():
 
-#Function to remove count from clause before passing it to the SQL query
-def extract_raw_value(selected_value):
-    #Remove count in parentheses if present
-    if "(" in selected_value and ")" in selected_value:
-        return selected_value.rsplit("(", 1)[0].strip()  #Split and remove count
-    return selected_value  #Return as-is if no count is present
+    mydb, cursor = connectDB()
+    results = []
+    query = """
+        SELECT `Common Name`, `Botanical Name`, `Plant ID`
+        FROM plants
+        WHERE 1+1
+    """
+
+    if dropdown_options[0].get():
+        query += " AND `Plant Type` = %s"
+        results.append(dropdown_options[0].get()) #Plant type dropdown
+    if dropdown_options[1].get():
+        query += " AND `Climate Zones` = %s"
+        results.append(dropdown_options[1].get()) #Climate zones dropdown
+    if dropdown_options[2].get():
+        query += " AND `Flower Colour` = %s"
+        results.append(dropdown_options[2].get()) #Flower colour dropdown
+    if dropdown_options[3].get():
+        query += f" AND `{dropdown_options[3].get()}` != 'Unknown'" #Tolerance dropdown #Can be Yes, Light, Medium, High
+    if dropdown_options[4].get():
+        query += f" AND `{dropdown_options[4].get()}` = 'Yes'" #Attracting dropdown
+
+    query += " LIMIT 16;"
+    
+    cursor.execute(query, (tuple(results)))
+    result = cursor.fetchall()
+    mydb.close()
+
+    return result
 
 # function that shows more details of a selected plant
 def show_selected_plant(plant_id):
+    # Connect to the database and fetch details for the selected plant
+    mydb, cursor = connectDB()
     
-    plant_details = get_plant_details(plant_id)
+    query = """
+    SELECT `Common Name`, `Botanical Name`, `Plant Type`, `Climate Zones`, `Flower Colour`, `Water Needs`, `Light Needs`, `Soil Type`, `Maintenance`, `Foliage Colour`, `Perfume`, `Aromatic`, `Edible`, `Notes`
+    FROM plants
+    WHERE `Plant ID` = %s
+    """
+    cursor.execute(query, (plant_id,))
+    plant_details = cursor.fetchone()  # Fetch the details of the selected plant
+    
+    mydb.close()   
 
     if plant_details:# plant_details:
         plant_window = Toplevel()
         plant_window.title("")
-        plant_window.geometry("800x550")
+        plant_window.geometry("700x500")
 
         # left frame
         left_frame = Frame(plant_window, bg="#06402B")
@@ -587,14 +645,14 @@ def show_selected_plant(plant_id):
                     # Set to "Remove from Favorites"
                     favorite_button.config(
                         text="Remove from Favorites",
-                        bg="#FF6347",  # Green
+                        bg="#32CD32",  # Green
                         command=lambda: toggle_and_refresh(False)
                     )
                 else:
                     # Set to "Add to Favorites"
                     favorite_button.config(
                         text="Add to Favorites",
-                        bg="#32CD32",  # Red
+                        bg="#FF6347",  # Red
                         command=lambda: toggle_and_refresh(True)
                     )
 
@@ -648,19 +706,19 @@ def show_selected_plant(plant_id):
         image_label.image = img  #Keep a reference to prevent garbage collection
         image_label.pack(anchor="center", padx=5, pady=30)
 
-        common_name = Label(left_frame, text=f"Common Name", font=("Arial", 12, "bold"), fg="white", bg=left_frame["bg"]) # so frame inherits bg colour
+        common_name = Label(left_frame, text=f"Common Name", font=("Arial", 13, "bold"), fg="white", bg=left_frame["bg"]) # so frame inherits bg colour
         common_name.pack(pady=5)
 
         common_name_label = Label(left_frame, text=f"{plant_details[0]}", font=("Arial", 12), fg="white", bg=left_frame["bg"])
         common_name_label.pack(pady=5)
 
-        botanical_name = Label(left_frame, text=f"Botanical Name", font=("Arial", 12, "bold"), fg="white", bg=left_frame["bg"])
+        botanical_name = Label(left_frame, text=f"Botanical Name", font=("Arial", 13, "bold"), fg="white", bg=left_frame["bg"])
         botanical_name.pack(pady=5)
         
         botanical_name_label = Label(left_frame, text=f"{plant_details[1]}", font=("Arial", 12), fg="white", bg=left_frame["bg"])
         botanical_name_label.pack(pady=5)
 
-        plant_type = Label(left_frame, text=f"Plant Type", font=("Arial", 12, "bold"), fg="white", bg=left_frame["bg"])
+        plant_type = Label(left_frame, text=f"Plant Type", font=("Arial", 13, "bold"), fg="white", bg=left_frame["bg"])
         plant_type.pack(pady=5)
         
         plant_type_label = Label(left_frame, text=f"{plant_details[2]}", font=("Arial", 12), fg="white", bg=left_frame["bg"])
@@ -683,35 +741,35 @@ def show_selected_plant(plant_id):
 
         # Create the labels and info pairs in a grid layout
         # Row 1 - "Climate Zone" title and info label
-        climate_zone = Label(maintenance_info_frame, text="Climate Zone", font=("Arial", 12, "bold"), fg="black", bg=right_frame["bg"]) #make any commas separated with a space
+        climate_zone = Label(maintenance_info_frame, text="Climate Zone", font=("Arial", 13, "bold"), fg="black", bg=right_frame["bg"]) #make any commas separated with a space
         climate_zone.grid(row=0, column=0, padx=10, pady=5, sticky="w")  # Title in the first row
 
         climate_zone_label = Label(maintenance_info_frame, text=f"{plant_details[3].replace(',', ', ')}", font=("Arial", 12), fg="black", bg=right_frame["bg"], wraplength=180, justify="left")
         climate_zone_label.grid(row=1, column=0, padx=10, pady=5, sticky="w")  # Info label underneath
 
         # Row 2 - "Water Needs" title and info label
-        water_needs = Label(maintenance_info_frame, text="Water Needs", font=("Arial", 12, "bold"), fg="black", bg=right_frame["bg"])
+        water_needs = Label(maintenance_info_frame, text="Water Needs", font=("Arial", 13, "bold"), fg="black", bg=right_frame["bg"])
         water_needs.grid(row=0, column=1, padx=10, pady=5, sticky="w")  # Title in the first row
 
         water_needs_label = Label(maintenance_info_frame, text=f"{plant_details[5]}", font=("Arial", 12), fg="black", bg=right_frame["bg"])
         water_needs_label.grid(row=1, column=1, padx=10, pady=5, sticky="w")  # Info label underneath
 
         # Row 3 - "Light Needs" title and info label
-        light_needs = Label(maintenance_info_frame, text="Light Needs", font=("Arial", 12, "bold"), fg="black", bg=right_frame["bg"])
+        light_needs = Label(maintenance_info_frame, text="Light Needs", font=("Arial", 13, "bold"), fg="black", bg=right_frame["bg"])
         light_needs.grid(row=0, column=2, padx=10, pady=5, sticky="w")  # Title in the first row
 
         light_needs_label = Label(maintenance_info_frame, text=f"{plant_details[6]}", font=("Arial", 12), fg="black", bg=right_frame["bg"])
         light_needs_label.grid(row=1, column=2, padx=10, pady=5, sticky="w")  # Info label underneath
 
         # Row 4 - "Soil Type" title and info label
-        soil_type = Label(maintenance_info_frame, text="Soil Type", font=("Arial", 12, "bold"), fg="black", bg=right_frame["bg"])
+        soil_type = Label(maintenance_info_frame, text="Soil Type", font=("Arial", 13, "bold"), fg="black", bg=right_frame["bg"])
         soil_type.grid(row=2, column=0, padx=10, pady=5, sticky="w")  # Title in the first row
 
         soil_type_label = Label(maintenance_info_frame, text=f"{plant_details[7].replace(',', ', ')}", font=("Arial", 12), fg="black", bg=right_frame["bg"])
         soil_type_label.grid(row=3, column=0, padx=10, pady=5, sticky="w")  # Info label underneath
 
         # Row 5 - "Maintenance Level" title and info label
-        maintenance = Label(maintenance_info_frame, text="Maintenance Level", font=("Arial", 12, "bold"), fg="black", bg=right_frame["bg"])
+        maintenance = Label(maintenance_info_frame, text="Maintenance Level", font=("Arial", 13, "bold"), fg="black", bg=right_frame["bg"])
         maintenance.grid(row=2, column=1, padx=10, pady=5, sticky="w")  # Title in the first row
 
         maintenance_label = Label(maintenance_info_frame, text=f"{plant_details[8]}", font=("Arial", 12), fg="black", bg=right_frame["bg"])
@@ -730,35 +788,35 @@ def show_selected_plant(plant_id):
         pc_frame.pack(fill="x", padx=10, pady=10)
 
         # Row 1 - "Flower Colour" Title and info label
-        flower_color = Label(pc_frame, text=f"Flower Color", font=("Arial", 12, "bold"), fg="black", bg=right_frame["bg"])
+        flower_color = Label(pc_frame, text=f"Flower Color", font=("Arial", 13, "bold"), fg="black", bg=right_frame["bg"])
         flower_color.grid(row=0, column=0, padx=10, pady=5, sticky="w")  # Title in the first row
         
         flower_color_label = Label(pc_frame, text=f"{plant_details[4]}", font=("Arial", 12), fg="black", bg=right_frame["bg"])
         flower_color_label.grid(row=1, column=0, padx=10, pady=5, sticky="w")  # Info label underneath
 
         # Row 2 - "Foliage Color" title and info label
-        foliage_color = Label(pc_frame, text="Foliage Color", font=("Arial", 12, "bold"), fg="black", bg=right_frame["bg"])
+        foliage_color = Label(pc_frame, text="Foliage Color", font=("Arial", 13, "bold"), fg="black", bg=right_frame["bg"])
         foliage_color.grid(row=0, column=1, padx=10, pady=5, sticky="w")  # Title in the first row
 
         foliage_color_label = Label(pc_frame, text=f"{plant_details[9]}", font=("Arial", 12), fg="black", bg=right_frame["bg"])
         foliage_color_label.grid(row=1, column=1, padx=10, pady=5, sticky="w")  # Info label underneath
 
         # Row 3 - "Perfume" title and info label
-        perfume = Label(pc_frame, text="Perfume", font=("Arial", 12, "bold"), fg="black", bg=right_frame["bg"])
+        perfume = Label(pc_frame, text="Perfume", font=("Arial", 13, "bold"), fg="black", bg=right_frame["bg"])
         perfume.grid(row=0, column=2, padx=10, pady=5, sticky="w")  # Title in the first row
 
         perfume_label = Label(pc_frame, text=f"{plant_details[10]}", font=("Arial", 12), fg="black", bg=right_frame["bg"])
         perfume_label.grid(row=1, column=2, padx=10, pady=5, sticky="w")  # Info label underneath
 
         # Row 4 - "Aromatic" title and info label
-        aromatic = Label(pc_frame, text="Aromatic", font=("Arial", 12, "bold"), fg="black", bg=right_frame["bg"])
+        aromatic = Label(pc_frame, text="Aromatic", font=("Arial", 13, "bold"), fg="black", bg=right_frame["bg"])
         aromatic.grid(row=2, column=0, padx=10, pady=5, sticky="w")  # Title in the first row
 
         aromatic_label = Label(pc_frame, text=f"{plant_details[11].replace(',', ', ')}", font=("Arial", 12), fg="black", bg=right_frame["bg"])
         aromatic_label.grid(row=3, column=0, padx=10, pady=5, sticky="w")  # Info label underneath
 
         # Row 5 - "Edible" title and info label
-        edible = Label(pc_frame, text="Edible", font=("Arial", 12, "bold"), fg="black", bg=right_frame["bg"])
+        edible = Label(pc_frame, text="Edible", font=("Arial", 13, "bold"), fg="black", bg=right_frame["bg"])
         edible.grid(row=2, column=1, padx=10, pady=5, sticky="w")  # Title in the first row
 
         edible_label = Label(pc_frame, text=f"{plant_details[12]}", font=("Arial", 12), fg="black", bg=right_frame["bg"])
@@ -840,90 +898,7 @@ def show_plants(plants):
             path = get_image_path(plant_id)
             image = Image.open(path)
             #print(f"Retrieved path for Plant ID {plant_id}: {path}")
-            resize_image = image.resize((100, 100)) 
-            img = ImageTk.PhotoImage(resize_image)  
-
-            # Add the image to a Label
-            image_label = Label(plant_frame, image=img, bg="lightgray")
-            image_label.image = img  #Keep a reference to prevent garbage collection
-            image_label.pack(anchor="center", padx=2, pady=2)
-                
-            # Display common name
-            common_label = Label(plant_frame, text=f"{common_name}", font=("Arial", 11, "bold"), bg="lightgray")
-            common_label.pack(anchor="center", padx=5, pady=2)
-
-            # Display botanical name
-            botanical_label = Label(plant_frame, text=f"{botanical_name}", font=("Arial", 11, "italic"), bg="lightgray")
-            botanical_label.pack(anchor="center", padx=5, pady=2)
-
-            # More info Button
-            more_info_button = Button(plant_frame, text="More info", font=("Arial", 8), command=lambda plant_id=plant_id: show_selected_plant(plant_id))
-            more_info_button.pack(anchor="center", padx=5, pady=10)
-
-#Function that opens favorites screen
-def open_favorites_screen():
-    global favorites_window, favorites_frame
-
-    if favorites_window and favorites_window.winfo_exists():
-        favorites_window.lift()
-        refresh_favorites()
-        return
-
-    # Create a new favorites window
-    favorites_window = Toplevel()
-    favorites_window.geometry("680x680")
-    favorites_window.title(f"{user_first_name} {user_last_name}'s favorites")
-
-    # Create a frame inside the window to hold the favorite plants
-    favorites_frame = Frame(favorites_window, bg="white", relief=SOLID, borderwidth=1)
-    favorites_frame.pack(fill="both", expand=True, padx=10, pady=10)
-
-    display_favorites(favorites_frame)
-
-# Function to display favorites in any frame
-def display_favorites(parent_frame):
-    # Clear the frame
-    for widget in parent_frame.winfo_children():
-        widget.destroy()
-
-    # Get user favorites
-    user_favorites = get_user_favorites(user_id)
-
-    # Show favorite plants
-    show_favourite_plants(parent_frame, user_favorites)
-
-#Function that refreshes the favorite window
-def refresh_favorites():
-    # print("Refresh called successfully")
-    if not favorites_window or not favorites_window.winfo_exists():
-        return
-    
-    for widget in favorites_frame.winfo_children():
-        widget.destroy()
-    
-    user_favorites = get_user_favorites(user_id)
-
-    show_favourite_plants(favorites_frame, user_favorites)
-
-
-def show_favourite_plants(parent_frame, plants):
-    if not plants:
-        label = Label(parent_frame, text="No favorite plants added.", font=("Arial", 12), bg=favorites_window["bg"])
-        label.place(relx=0.5, rely=0.2, anchor="center")
-        return
-    else:
-        for row_idx, (common_name, botanical_name, plant_id) in enumerate(plants):
-            column_count = row_idx % 3
-            plant_frame = Frame(parent_frame, bg="lightgray", relief=SOLID, borderwidth=1)
-            plant_frame.grid(row=row_idx // 3, column=column_count, padx=10, pady=10, sticky="nsew")
-            plant_frame.config(width=200, height=200)
-            plant_frame.propagate(False)
-
-            # Image
-            path = get_image_path(plant_id)
-            image = Image.open(path)
-            #print(f"Retrieved path for Plant ID {plant_id}: {path}")
-            resize_image = image.resize((60, 60)) 
+            resize_image = image.resize((80, 80)) 
             img = ImageTk.PhotoImage(resize_image)  
 
             # Add the image to a Label
@@ -942,6 +917,7 @@ def show_favourite_plants(parent_frame, plants):
             # More info Button
             more_info_button = Button(plant_frame, text="More info", font=("Arial", 8), command=lambda plant_id=plant_id: show_selected_plant(plant_id))
             more_info_button.pack(anchor="center", padx=5, pady=10)
+
 
 #Clear existing widgets in the scrollable frame and entry
 def clear_entry_and_frame():
@@ -983,7 +959,6 @@ def show_entry_search(event=None):
 find_plant_button = Button(search_frame, text="Find plant", font=("Arial", 12), command=show_advanced_search)
 find_plant_button.grid(padx=10, pady=10)
 
-#Clear all button
 clear_button = Button(search_frame, text="Clear all", font=("Arial", 12, "bold"), bg="#06402B", fg="white", command=clear_all_search)
 clear_button.place(relx=0.5, rely=0.95, anchor="s")
 
