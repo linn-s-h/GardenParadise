@@ -215,7 +215,7 @@ def sign_up_user(username, first_name, last_name, password, confirm_password, si
         mydb, cursor = connectDB()
 
         # Check if username already exists
-        cursor.execute("SELECT * FROM users WHERE username=%s", (username,))
+        cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
         existing_user=cursor.fetchone()
 
         if existing_user:
@@ -426,89 +426,6 @@ def log_out():
     messagebox.showinfo("Logged Out", "You have successfully logged out.")
     update_menu_buttons()
 
-#Function that opens favorites screen
-def open_favorites_screen():
-    global favorites_window, favorites_frame
-
-    if favorites_window and favorites_window.winfo_exists():
-        favorites_window.lift()
-        refresh_favorites()
-        return
-
-    # Create a new favorites window
-    favorites_window = Toplevel()
-    favorites_window.geometry("550x550")
-    favorites_window.title(f"{user_first_name} {user_last_name}'s favorites")
-
-    # Create a frame inside the window to hold the favorite plants
-    favorites_frame = Frame(favorites_window, bg="white", relief=SOLID, borderwidth=1)
-    favorites_frame.pack(fill="both", expand=True, padx=10, pady=10)
-
-    display_favorites(favorites_frame)
-
-# Function to display favorites in any frame
-def display_favorites(parent_frame):
-    # Clear the frame
-    for widget in parent_frame.winfo_children():
-        widget.destroy()
-
-    # Get user favorites
-    user_favorites = get_user_favorites(user_id)
-
-    # Show favorite plants
-    show_favourite_plants(parent_frame, user_favorites)
-
-#Function that refreshes the favorite window
-def refresh_favorites():
-    # print("Refresh called successfully")
-    if not favorites_window or not favorites_window.winfo_exists():
-        return
-    
-    for widget in favorites_frame.winfo_children():
-        widget.destroy()
-    
-    user_favorites = get_user_favorites(user_id)
-
-    show_favourite_plants(favorites_frame, user_favorites)
-
-
-def show_favourite_plants(parent_frame, plants):
-    if not plants:
-        label = Label(parent_frame, text="No favorite plants added.", font=("Arial", 12), bg=favorites_window["bg"])
-        label.place(relx=0.5, rely=0.2, anchor="center")
-        return
-    else:
-        for row_idx, (common_name, botanical_name, plant_id) in enumerate(plants):
-            column_count = row_idx % 3
-            plant_frame = Frame(parent_frame, bg="lightgray", relief=SOLID, borderwidth=1)
-            plant_frame.grid(row=row_idx // 3, column=column_count, padx=10, pady=10, sticky="nsew")
-            plant_frame.config(width=150, height=150)
-            plant_frame.propagate(False)
-
-            # Image
-            path = get_image_path(plant_id)
-            image = Image.open(path)
-            #print(f"Retrieved path for Plant ID {plant_id}: {path}")
-            resize_image = image.resize((60, 60)) 
-            img = ImageTk.PhotoImage(resize_image)  
-
-            # Add the image to a Label
-            image_label = Label(plant_frame, image=img, bg="lightgray")
-            image_label.image = img  #Keep a reference to prevent garbage collection
-            image_label.pack(anchor="center", padx=5, pady=5)
-                
-            # Display common name
-            common_label = Label(plant_frame, text=f"{common_name}", font=("Arial", 11, "bold"), bg="lightgray")
-            common_label.pack(anchor="center", padx=5, pady=2)
-
-            # Display botanical name
-            botanical_label = Label(plant_frame, text=f"{botanical_name}", font=("Arial", 11, "italic"), bg="lightgray")
-            botanical_label.pack(anchor="center", padx=5, pady=2)
-
-            # More info Button
-            more_info_button = Button(plant_frame, text="More info", font=("Arial", 8), command=lambda plant_id=plant_id: show_selected_plant(plant_id))
-            more_info_button.pack(anchor="center", padx=5, pady=10)
-
 
 #Function that updates the displayed menu buttons depending on the login status
 def update_menu_buttons():
@@ -604,7 +521,7 @@ def show_selected_plant(plant_id):
     if plant_details:# plant_details:
         plant_window = Toplevel()
         plant_window.title("")
-        plant_window.geometry("700x500")
+        plant_window.geometry("800x550")
 
         # left frame
         left_frame = Frame(plant_window, bg="#06402B")
@@ -657,14 +574,14 @@ def show_selected_plant(plant_id):
                     # Set to "Remove from Favorites"
                     favorite_button.config(
                         text="Remove from Favorites",
-                        bg="#32CD32",  # Green
+                        bg="#FF6347",  # Green
                         command=lambda: toggle_and_refresh(False)
                     )
                 else:
                     # Set to "Add to Favorites"
                     favorite_button.config(
                         text="Add to Favorites",
-                        bg="#FF6347",  # Red
+                        bg="#32CD32",  # Red
                         command=lambda: toggle_and_refresh(True)
                     )
 
@@ -930,6 +847,88 @@ def show_plants(plants):
             more_info_button = Button(plant_frame, text="More info", font=("Arial", 8), command=lambda plant_id=plant_id: show_selected_plant(plant_id))
             more_info_button.pack(anchor="center", padx=5, pady=10)
 
+#Function that opens favorites screen
+def open_favorites_screen():
+    global favorites_window, favorites_frame
+
+    if favorites_window and favorites_window.winfo_exists():
+        favorites_window.lift()
+        refresh_favorites()
+        return
+
+    # Create a new favorites window
+    favorites_window = Toplevel()
+    favorites_window.geometry("680x680")
+    favorites_window.title(f"{user_first_name} {user_last_name}'s favorites")
+
+    # Create a frame inside the window to hold the favorite plants
+    favorites_frame = Frame(favorites_window, bg="white", relief=SOLID, borderwidth=1)
+    favorites_frame.pack(fill="both", expand=True, padx=10, pady=10)
+
+    display_favorites(favorites_frame)
+
+# Function to display favorites in any frame
+def display_favorites(parent_frame):
+    # Clear the frame
+    for widget in parent_frame.winfo_children():
+        widget.destroy()
+
+    # Get user favorites
+    user_favorites = get_user_favorites(user_id)
+
+    # Show favorite plants
+    show_favourite_plants(parent_frame, user_favorites)
+
+#Function that refreshes the favorite window
+def refresh_favorites():
+    # print("Refresh called successfully")
+    if not favorites_window or not favorites_window.winfo_exists():
+        return
+    
+    for widget in favorites_frame.winfo_children():
+        widget.destroy()
+    
+    user_favorites = get_user_favorites(user_id)
+
+    show_favourite_plants(favorites_frame, user_favorites)
+
+
+def show_favourite_plants(parent_frame, plants):
+    if not plants:
+        label = Label(parent_frame, text="No favorite plants added.", font=("Arial", 12), bg=favorites_window["bg"])
+        label.place(relx=0.5, rely=0.2, anchor="center")
+        return
+    else:
+        for row_idx, (common_name, botanical_name, plant_id) in enumerate(plants):
+            column_count = row_idx % 3
+            plant_frame = Frame(parent_frame, bg="lightgray", relief=SOLID, borderwidth=1)
+            plant_frame.grid(row=row_idx // 3, column=column_count, padx=10, pady=10, sticky="nsew")
+            plant_frame.config(width=200, height=200)
+            plant_frame.propagate(False)
+
+            # Image
+            path = get_image_path(plant_id)
+            image = Image.open(path)
+            #print(f"Retrieved path for Plant ID {plant_id}: {path}")
+            resize_image = image.resize((60, 60)) 
+            img = ImageTk.PhotoImage(resize_image)  
+
+            # Add the image to a Label
+            image_label = Label(plant_frame, image=img, bg="lightgray")
+            image_label.image = img  #Keep a reference to prevent garbage collection
+            image_label.pack(anchor="center", padx=5, pady=5)
+                
+            # Display common name
+            common_label = Label(plant_frame, text=f"{common_name}", font=("Arial", 11, "bold"), bg="lightgray")
+            common_label.pack(anchor="center", padx=5, pady=2)
+
+            # Display botanical name
+            botanical_label = Label(plant_frame, text=f"{botanical_name}", font=("Arial", 11, "italic"), bg="lightgray")
+            botanical_label.pack(anchor="center", padx=5, pady=2)
+
+            # More info Button
+            more_info_button = Button(plant_frame, text="More info", font=("Arial", 8), command=lambda plant_id=plant_id: show_selected_plant(plant_id))
+            more_info_button.pack(anchor="center", padx=5, pady=10)
 
 #Clear existing widgets in the scrollable frame and entry
 def clear_entry_and_frame():
