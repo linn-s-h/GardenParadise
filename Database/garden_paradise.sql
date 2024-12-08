@@ -117,18 +117,16 @@ DROP COLUMN id;
 
 SELECT COUNT(`Plant Type`), (SELECT DISTINCT `Plant Type`) FROM plants GROUP BY `Plant Type`;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# Create USER table
+CREATE TABLE IF NOT EXISTS users (
+	user_id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    `password` VARCHAR(255) NOT NULL
+    );
+    
+# Sample "new user" insert query
+INSERT INTO users (username, `password`)
+	VALUES ('joaquinbgarcia', 'testing');
+    
+# Sample user retrieval
+SELECT user_id, username, `password` FROM users WHERE username = "joaquinbgarcia";

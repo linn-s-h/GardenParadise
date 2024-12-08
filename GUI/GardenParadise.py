@@ -1,12 +1,16 @@
 import mysql.connector
 from tkinter import *
 from tkinter import PhotoImage
+from tkinter import messagebox
 from PIL import Image, ImageTk
 
 DB_HOST = "localhost"
 DB_USER = "root"
 DB_PASSWORD = "Clownpokemon8"
 DB_DATABASE = "mydb"
+logged_in_user = None
+user_first_name = None
+user_last_name = None
 
 #Connection code 
 def connectDB():
@@ -129,6 +133,35 @@ def open_sign_up_screen():
     sign_up_window.geometry("600x500")
     sign_up_window.title("Signing up")
 
+# check if login credentials match a registered user in the database
+def validate_login(username, password, login_window):
+    global logged_in, logged_in_user, user_first_name, user_last_name
+    try:
+        mydb, cursor = connectDB()
+
+        query = "SELECT * FROM users WHERE username = %s and password = %s"
+        cursor.execute(query, (username, password))
+        user = cursor.fetchone()
+
+        if user:
+            logged_in = True
+            logged_in_user = user[1]
+            user_first_name = user[2]
+            user_last_name = user[3]
+            messagebox.showinfo("Login Successful", f"Welcome, {user_first_name} {user_last_name}!")
+            login_window.destroy()
+            update_menu_buttons()
+        else:
+            messagebox.showerror("Login Failed", "Invalid username or password.")
+            return False
+
+    except Exception as e:
+        print(f"Error: {e}")
+        return False
+    finally:
+        if mydb:
+            mydb.close()
+
 #Function that opens a log in screen
 def open_login_screen():
     login_window = Toplevel()
@@ -152,11 +185,12 @@ def open_login_screen():
     app_title.pack(padx=10, pady=10, side="top")
     login_title = Label(main_container, text="Login", font=("Arial", 12, "bold"))
     login_title.pack(padx=10, pady=10, side="top")
-    username = Entry(main_container)
-    username.pack(padx=10, pady=10, side="top")
-    password = Entry(main_container)
-    password.pack(padx=10, pady=10, side="top")
-    login_button = Button(main_container, text="Login", font=("Arial", 10, "bold"), fg="white", bg="#06402B")
+    username_entry = Entry(main_container)
+    username_entry.pack(padx=10, pady=10, side="top")
+    password_entry = Entry(main_container, show="*")
+    password_entry.pack(padx=10, pady=10, side="top")
+
+    login_button = Button(main_container, text="Login", font=("Arial", 10, "bold"), fg="white", bg="#06402B", command=lambda:validate_login(username_entry.get(),password_entry.get(), login_window))
     login_button.pack(padx=10, pady=10, side="top")
 
     sign_up_text = Label(sign_up_container, text="Don't have an account yet?", font=("Arial", 10, "bold"), fg="white", bg="#06402B")
@@ -164,12 +198,15 @@ def open_login_screen():
     sign_up_button = Button(sign_up_container, text="Sign up", font=("Arial", 10, "bold"), fg="#06402B", bg="white", command=open_sign_up_screen)
     sign_up_button.pack(padx=10, pady=10, side="left")
 
-    #Change logged_in value to True
-    change_login_status(True)
+    
+
 
 #Function that alters staus when logging out   
 def log_out():
-    change_login_status(False)
+    global logged_in
+    logged_in = False
+    messagebox.showinfo("Logged Out", "You have successfully logged out.")
+    update_menu_buttons()
 
 #Function that opens favorites screen
 def open_favorites_screen():
@@ -189,14 +226,18 @@ def update_menu_buttons():
         sign_up_button.pack(padx=10, pady=20, side="right")
         login_button = Button(buttons_frame, text="Login", font=("Arial", 12), command=open_login_screen)
         login_button.pack(padx=10, pady=20, side="right")
+        
+        welcome_label = Label(buttons_frame, text="Welcome", font=("Arial", 14), bg="#06402B", fg="white")
+        welcome_label.pack(padx=10, pady=10, side="right")
+
     else:
         log_out_button = Button(buttons_frame, text="Log out", font=("Arial", 12), command=log_out)
         log_out_button.pack(padx=10, pady=20, side="right")
         favorites_button = Button(buttons_frame, text="Your favorites", font=("Arial", 12), command=open_favorites_screen)
         favorites_button.pack(padx=10, pady=20, side="right")
 
-    welcome_label = Label(buttons_frame, text="Welcome", font=("Arial", 14), bg="#06402B", fg="white")
-    welcome_label.pack(padx=10, pady=10, side="right")
+        welcome_label = Label(buttons_frame, text=f"Welcome, {user_first_name} {user_last_name}", font=("Arial", 14), bg="#06402B", fg="white")
+        welcome_label.pack(padx=10, pady=10, side="right")
 
 update_menu_buttons()
 
@@ -284,7 +325,7 @@ def fetch_plant_results():
 
     return result
 
-# Joaquin do this
+# function that shows more details of a selected plant
 def show_selected_plant(plant_id):
     # Connect to the database and fetch details for the selected plant
     mydb, cursor = connectDB()
