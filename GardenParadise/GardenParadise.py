@@ -662,12 +662,6 @@ def show_selected_plant(plant_id):
             # Check if the plant is already a favorite when creating the button
             try:
                 mydb, cursor = connectDB()
-
-                # Check if the user is logged in before checking favorites
-                if not user_id:
-                    messagebox.showinfo("Login Required", "Please log in to add to your favorites.")
-                    print("Ran 2nd function")
-                    return  # Exit if not logged in
                 
                 cursor.execute("SELECT * FROM favourites WHERE `User ID` = %s AND `Plant ID` = %s", (user_id, plant_id))
                 is_favorited = cursor.fetchone() is not None
@@ -940,6 +934,11 @@ def clear_all_search():
     for i in range(len(dropdown_labels)):
         dropdown_options[i].set("")
 
+    # Destroy all top-level windows except the main window (root)
+    for new_window in list(window.winfo_children()):  # Fetch all child windows (Toplevel)
+        if isinstance(new_window, Toplevel):
+            new_window.destroy()  # Destroy Toplevel windows
+
 #Showing advanced search results
 def show_advanced_search():
 
@@ -968,17 +967,3 @@ search_entry.bind('<Return>', show_entry_search)
 
 
 window.mainloop()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
