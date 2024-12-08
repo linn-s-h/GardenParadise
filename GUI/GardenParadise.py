@@ -1,5 +1,6 @@
 import mysql.connector
 import config
+import os
 from tkinter import *
 from tkinter import PhotoImage
 from tkinter import messagebox
@@ -8,6 +9,8 @@ from PIL import Image, ImageTk
 logged_in_user = None
 user_first_name = None
 user_last_name = None
+
+BASE_IMAGE_DIR = r"C:\Users\linns\OneDrive\Desktop\Relational Database\GardenParadise\Data"
 
 #Connection code 
 def connectDB():
