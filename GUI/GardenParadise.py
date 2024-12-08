@@ -127,11 +127,117 @@ def change_login_status(status):
     logged_in = False
     update_menu_buttons()
 
+# Function that registers the user into the user table
+def sign_up_user(username, first_name, last_name, password, confirm_password, sign_up_window):
+    if not username or not password or not confirm_password:
+        messagebox.showerror("Error", "All fields are required")
+        return
+    
+    if password != confirm_password:
+        messagebox.showerror("Error", "Passwords do not match!")
+        return
+    
+    try:
+        mydb, cursor = connectDB()
+
+        # Check if username already exists
+        cursor.execute("SELECT * FROM users WHERE username=%s", (username,))
+        existing_user=cursor.fetchone()
+
+        if existing_user:
+            messagebox.showerror("Error", "Username already exists")
+            return
+            
+
+        query = "INSERT INTO users (username, first_name, last_name, `password`) VALUES (%s, %s, %s, %s)"
+        cursor.execute(query, (username, first_name, last_name, password))
+        mydb.commit()
+
+        messagebox.showinfo("Success", "Account created successfully!")
+        sign_up_window.destroy()
+    except Exception as e:
+        print(f"Error: {e}")
+        messagebox.showerror("Database Error", f"An error occurred: {e}")
+    finally:
+        if mydb:
+            mydb.close()
+
 #Function that opens a sign up screen
 def open_sign_up_screen():
     sign_up_window = Toplevel()
-    sign_up_window.geometry("600x500")
+    sign_up_window.geometry("400x400")
     sign_up_window.title("Signing up")
+
+    title_frame = Frame(sign_up_window, bg="#F2F0EF")
+    title_frame.place(relx=0, rely=0, relheight=0.25, relwidth=1, anchor="nw")
+
+    main_frame = Frame(sign_up_window, bg="#F2F0EF")
+    main_frame.place(relx=0, rely=0.25, relheight=0.65, relwidth=1, anchor="nw")
+
+    bottom_frame = Frame(sign_up_window, bg="#06402B")
+    bottom_frame.place(relx=0, rely=0.9, relheight=0.1, relwidth=1, anchor="nw")
+
+    title_container = Frame(title_frame, bg="#F2F0EF")
+    title_container.pack(expand=True)
+
+    main_container = Frame(main_frame, bg="#F2F0EF")
+    main_container.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
+
+    app_title = Label(title_container, text="Garden Paradise", font=("Helvetica", 24, "bold"), fg="#06402B")
+    app_title.pack(padx=10, pady=10)
+
+    sign_up_title = Label(title_container, text="Create an account", font=("Arial", 12, "bold"))
+    sign_up_title.pack(padx=10, pady=10)
+
+    username_label = Label(main_container, text="Username:", font=("Arial", 10))
+    username_label.grid(row=2, column=0, padx=10, pady=5, sticky="w")
+    username_entry = Entry(main_container)
+    username_entry.grid(row=2, column=1, padx=10, pady=5, sticky="ew")
+
+    first_name_label = Label(main_container, text="First Name:", font=("Arial", 10))
+    first_name_label.grid(row=3, column=0, padx=10, pady=5, sticky="w")
+    first_name_entry = Entry(main_container)
+    first_name_entry.grid(row=3, column=1, padx=10, pady=5, sticky="ew")
+
+    first_name_label = Label(main_container, text="Last Name:", font=("Arial", 10))
+    first_name_label.grid(row=4, column=0, padx=10, pady=5, sticky="w")
+    last_name_entry = Entry(main_container)
+    last_name_entry.grid(row=4, column=1, padx=10, pady=5, sticky="ew")
+
+    password_label = Label(main_container, text="Password:", font=("Arial", 10))
+    password_label.grid(row=5, column=0, padx=10, pady=5, sticky="w")
+    password_entry = Entry(main_container, show="*")
+    password_entry.grid(row=5, column=1, padx=10, pady=5, sticky="ew")
+
+    confirm_password_label = Label(main_container, text="Confirm Password:", font=("Arial", 10))
+    confirm_password_label.grid(row=6, column=0, padx=10, pady=5, sticky="w")
+    confirm_password_entry = Entry(main_container, show="*")
+    confirm_password_entry.grid(row=6, column=1, padx=10, pady=5, sticky="ew")
+
+    sign_up_button = Button(main_container, text="Sign up", font=("Arial", 10, "bold"),
+                            fg="white", bg="#06402B", command=lambda: sign_up_user(
+                                username_entry.get(),
+                                first_name_entry.get(),
+                                last_name_entry.get(),
+                                password_entry.get(),
+                                confirm_password_entry.get(),
+                                sign_up_window
+                            ))
+    sign_up_button.grid(row=7, column=0, columnspan=2, padx=10, pady=20)
+
+    # Bind the Enter key to trigger the sign-up function
+    sign_up_window.bind('<Return>', lambda event: sign_up_user(
+        username_entry.get(), first_name_entry.get(), last_name_entry.get(), password_entry.get(), confirm_password_entry.get(),
+        sign_up_window))
+    
+    sign_up_container = Frame(bottom_frame, bg="#06402B")
+    sign_up_container.pack(expand=True)
+    
+    sign_up_text = Label(sign_up_container, text="Already have an account?", font=("Arial", 10, "bold"), fg="white", bg="#06402B")
+    sign_up_text.pack(padx=10, pady=10, side="left")
+
+    login_button = Button(sign_up_container, text="Login", font=("Arial", 10, "bold"), fg="#06402B", bg="white", command=open_login_screen)
+    login_button.pack(padx=10, pady=10, side="left")
 
 # check if login credentials match a registered user in the database
 def validate_login(username, password, login_window):
@@ -605,4 +711,85 @@ def show_plants(plants):
             plant_frame.propagate(False)
 
             # Image
-            image = Image.open(r"C:\Users\linns\OneDrive\Desktop\Relational Database\
+            image = Image.open(r"C:\Users\linns\OneDrive\Desktop\Relational Database\GardenParadise\Data\cute-pot.png")
+            resize_image = image.resize((80, 80))  # Resize to a larger size if 10x10 is too small
+            img = ImageTk.PhotoImage(resize_image)  # Use ImageTk.PhotoImage, not PhotoImage
+
+            # Add the image to a Label
+            image_label = Label(plant_frame, image=img, bg="lightgray")
+            image_label.image = img  #Keep a reference to prevent garbage collection
+            image_label.pack(anchor="center", padx=5, pady=5)
+                
+            # Display common name
+            common_label = Label(plant_frame, text=f"{common_name}", font=("Arial", 11, "bold"), bg="lightgray")
+            common_label.pack(anchor="center", padx=5, pady=2)
+
+            # Display botanical name
+            botanical_label = Label(plant_frame, text=f"{botanical_name}", font=("Arial", 11, "italic"), bg="lightgray")
+            botanical_label.pack(anchor="center", padx=5, pady=2)
+
+            # More info Button
+            more_info_button = Button(plant_frame, text="More info", font=("Arial", 8), command=lambda plant_id=plant_id: show_selected_plant(plant_id))
+            more_info_button.pack(anchor="center", padx=5, pady=10)
+
+
+#Clear existing widgets in the scrollable frame and entry
+def clear_entry_and_frame():
+    for widget in scrollable_frame.winfo_children():
+        widget.destroy()
+    search_entry.delete(0, 'end')
+
+def clear_frame():
+    for widget in scrollable_frame.winfo_children():
+        widget.destroy()
+    for i in range(len(dropdown_labels)):
+        dropdown_options[i].set("")
+
+def clear_all_search(): 
+    clear_entry_and_frame() 
+    for i in range(len(dropdown_labels)):
+        dropdown_options[i].set("")
+
+#Showing advanced search results
+def show_advanced_search():
+
+    clear_entry_and_frame()
+    plants = fetch_plant_results()
+    show_plants(plants)
+
+def show_entry_search(event=None):
+
+    clear_frame()
+    plant_name = search_entry.get().strip()
+    plants = get_plants_by_search(plant_name)
+    show_plants(plants)
+
+#Find plant search button
+find_plant_button = Button(search_frame, text="Find plant", font=("Arial", 12), command=show_advanced_search)
+find_plant_button.grid(padx=10, pady=10)
+
+clear_button = Button(search_frame, text="Clear all", font=("Arial", 12, "bold"), bg="#06402B", fg="white", command=clear_all_search)
+clear_button.place(relx=0.5, rely=0.95, anchor="s")
+
+#Search plant button
+search_button = Button(search_frame, text="Search", font=("Arial", 12), command=show_entry_search)
+search_button.grid(row=1, column=0, padx=(10, 10), pady=10)  # Place next to entry
+search_entry.bind('<Return>', show_entry_search)
+
+
+
+window.mainloop()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
