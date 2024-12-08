@@ -372,8 +372,8 @@ def open_favorites_screen():
 
     # Create a new favorites window
     favorites_window = Toplevel()
-    favorites_window.geometry("600x500")
-    favorites_window.title("Your favorites")
+    favorites_window.geometry("550x550")
+    favorites_window.title(f"{user_first_name} {user_last_name}'s favorites")
 
     # Create a frame inside the window to hold the favorite plants
     favorites_frame = Frame(favorites_window, bg="white", relief=SOLID, borderwidth=1)
