@@ -1,4 +1,4 @@
 import tkinter as tk
 import gui
 
-gui.window.mai
+gui.window.mainloop()

@@ -1,5 +1,6 @@
 import mysql.connector
 import config
+import os
 from tkinter import *
 from tkinter import PhotoImage
 from tkinter import messagebox
@@ -8,6 +9,9 @@ from PIL import Image, ImageTk
 logged_in_user = None
 user_first_name = None
 user_last_name = None
+user_id = None
+favorites_window = None
+favorites_frame = None
 
 #Connection code 
 def connectDB():
@@ -59,7 +63,7 @@ def get_plants_by_search(plant_name):
     FROM plants
     WHERE `Common Name` LIKE %s OR `Botanical Name` LIKE %s
     ORDER BY `Common Name` ASC
-    LIMIT 16;
+    LIMIT 15;
     """
     cursor.execute(query, (f"%{plant_name}%", f"%{plant_name}%",))
     values = cursor.fetchall()
@@ -79,7 +83,7 @@ def get_image_path(plant_id):
     try:
         if value:
             relative_path = value[0].strip()  # Get the relative path from the database
-            full_path = os.path.join(BASE_IMAGE_DIR, relative_path)  # Combine base directory with relative path
+            full_path = os.path.join(config.BASE_IMAGE_DIR, relative_path)  # Combine base directory with relative path
             return full_path
         else:
             return None
@@ -90,7 +94,7 @@ def get_image_path(plant_id):
 
 #GUI
 window = Tk()
-window.geometry("1000x800")
+window.geometry("1050x800")
 window.title("Garden Paradise")
 
 #Configurate the rows and columns for proportional resizing
@@ -244,7 +248,7 @@ def open_sign_up_screen():
 
 # check if login credentials match a registered user in the database
 def validate_login(username, password, login_window):
-    global logged_in, logged_in_user, user_first_name, user_last_name
+    global logged_in, logged_in_user, user_first_name, user_last_name, user_id
     try:
         mydb, cursor = connectDB()
 
@@ -257,6 +261,7 @@ def validate_login(username, password, login_window):
             logged_in_user = user[1]
             user_first_name = user[2]
             user_last_name = user[3]
+            user_id = user[0]
             messagebox.showinfo("Login Successful", f"Welcome, {user_first_name} {user_last_name}!")
             login_window.destroy()
             update_menu_buttons()
@@ -346,16 +351,114 @@ def open_login_screen():
 
 #Function that alters staus when logging out   
 def log_out():
-    global logged_in
+    global logged_in, user_id, user_first_name, user_last_name
     logged_in = False
+    user_id = None
+    user_first_name = None
+    user_last_name = None
+    if favorites_window:
+        favorites_window.destroy()
     messagebox.showinfo("Logged Out", "You have successfully logged out.")
     update_menu_buttons()
 
 #Function that opens favorites screen
 def open_favorites_screen():
+    global favorites_window, favorites_frame
+
+    if favorites_window and favorites_window.winfo_exists():
+        favorites_window.lift()
+        refresh_favorites()
+        return
+
+    # Create a new favorites window
     favorites_window = Toplevel()
     favorites_window.geometry("600x500")
     favorites_window.title("Your favorites")
+
+    # Create a frame inside the window to hold the favorite plants
+    favorites_frame = Frame(favorites_window, bg="white", relief=SOLID, borderwidth=1)
+    favorites_frame.pack(fill="both", expand=True, padx=10, pady=10)
+
+    display_favorites(favorites_frame)
+
+# Function to display favorites in any frame
+def display_favorites(parent_frame):
+    # Clear the frame
+    for widget in parent_frame.winfo_children():
+        widget.destroy()
+
+    # Get user favorites
+    user_favorites = get_user_favorites(user_id)
+
+    # Show favorite plants
+    show_favourite_plants(parent_frame, user_favorites)
+
+#Function that refreshes the favorite window
+def refresh_favorites():
+    # print("Refresh called successfully")
+    if not favorites_window or not favorites_window.winfo_exists():
+        return
+    
+    for widget in favorites_frame.winfo_children():
+        widget.destroy()
+    
+    user_favorites = get_user_favorites(user_id)
+
+    show_favourite_plants(favorites_frame, user_favorites)
+
+
+def get_user_favorites(user_id):
+    mydb, cursor = connectDB()
+    
+    query = """
+    SELECT p.`Common Name`, p.`Botanical Name`, p.`Plant ID`
+    FROM favourites f
+    JOIN plants p ON f.`Plant ID` = p.`Plant ID`
+    WHERE f.`User ID` = %s ORDER BY f.added_date DESC LIMIT 9;
+    """
+    cursor.execute(query, (user_id,))
+    plants = cursor.fetchall()  # Fetch the details of the selected plant
+    
+    mydb.close()
+    return plants
+
+def show_favourite_plants(parent_frame, plants):
+    if not plants:
+        label = Label(parent_frame, text="No favorite plants added.", font=("Arial", 12), bg=favorites_window["bg"])
+        label.place(relx=0.5, rely=0.2, anchor="center")
+        return
+    else:
+        for row_idx, (common_name, botanical_name, plant_id) in enumerate(plants):
+            column_count = row_idx % 3
+            plant_frame = Frame(parent_frame, bg="lightgray", relief=SOLID, borderwidth=1)
+            plant_frame.grid(row=row_idx // 3, column=column_count, padx=10, pady=10, sticky="nsew")
+            plant_frame.config(width=150, height=150)
+            plant_frame.propagate(False)
+
+            # Image
+            path = get_image_path(plant_id)
+            image = Image.open(path)
+            #print(f"Retrieved path for Plant ID {plant_id}: {path}")
+            resize_image = image.resize((60, 60)) 
+            img = ImageTk.PhotoImage(resize_image)  
+
+            # Add the image to a Label
+            image_label = Label(plant_frame, image=img, bg="lightgray")
+            image_label.image = img  #Keep a reference to prevent garbage collection
+            image_label.pack(anchor="center", padx=5, pady=5)
+                
+            # Display common name
+            common_label = Label(plant_frame, text=f"{common_name}", font=("Arial", 11, "bold"), bg="lightgray")
+            common_label.pack(anchor="center", padx=5, pady=2)
+
+            # Display botanical name
+            botanical_label = Label(plant_frame, text=f"{botanical_name}", font=("Arial", 11, "italic"), bg="lightgray")
+            botanical_label.pack(anchor="center", padx=5, pady=2)
+
+            # More info Button
+            more_info_button = Button(plant_frame, text="More info", font=("Arial", 8), command=lambda plant_id=plant_id: show_selected_plant(plant_id))
+            more_info_button.pack(anchor="center", padx=5, pady=10)
+
 
 #Function that updates the displayed menu buttons depending on the login status
 def update_menu_buttons():
@@ -493,31 +596,107 @@ def show_selected_plant(plant_id):
         left_frame = Frame(plant_window, bg="#06402B")
         left_frame.place(relx=0, rely=0, relwidth=0.3, relheight=1)
 
-        # Display the details in the left frame
-        # Add favourites button
-        def add_to_favorites():
-            # Add logic to save the current plant to favorites
-            print("Plant added to favorites!")
+        # Toggle favorites status of the user
+        def toggle_favorites(plant_id):
+            try:
+                mydb, cursor = connectDB()
 
-        add_to_favorites_button = Button(
-            left_frame,
-            text="Add to Favorites",
-            font=("Arial", 12, "bold"),
-            bg="#FF6347",  # Tomato red background
-            fg="white",  # White text
-            activebackground="#FF4500",  # Slightly darker red when pressed
-            activeforeground="white",
-            relief="raised",  # Button effect
-            borderwidth=2,  # Border thickness
-            command=add_to_favorites  # Function to handle button click
-        )
-        add_to_favorites_button.pack(
-            side="bottom",  # Pack at the bottom
-            pady=20,  # Add vertical padding
-            padx=10,  # Add horizontal padding
-            fill="x"  # Make it stretch horizontally
-        )
+                if not user_id:
+                    messagebox.showinfo("Login Required", "Please log in to access your Favorites.")
+                    print("Ran 1st function")
+                    return
 
+                # Check if the plant is already favorited
+                cursor.execute("SELECT * FROM favourites WHERE `User ID` = %s AND `Plant ID` = %s", (user_id, plant_id))
+                existing_favorite = cursor.fetchone()
+
+                if existing_favorite:
+                    # If it exists, remove from favorites
+                    cursor.execute("DELETE FROM favourites WHERE `User ID` = %s AND `Plant ID` = %s", (user_id, plant_id))
+                    mydb.commit()
+                    messagebox.showinfo("Success", "Favorite removed successfully!")
+                    return False  # Indicate plant is no longer a favorite
+                else:
+                    # If not, add to favorites
+                    query = "INSERT INTO favourites (`User ID`, `Plant ID`) VALUES (%s, %s);"
+                    cursor.execute(query, (user_id, plant_id))
+                    mydb.commit()
+                    messagebox.showinfo("Success", "Favorite added successfully!")
+                    return True  # Indicate plant is now a favorite
+
+            except Exception as e:
+                print(f"Error: {e}")
+                messagebox.showerror("Database Error", f"An error occurred: {e}")
+            finally:
+                if mydb:
+                    mydb.close()
+                if favorites_window and favorites_window.winfo_exists():
+                    refresh_favorites()
+            
+            
+
+        # Create or update favorite button dynamically depending on existing status
+        def create_or_update_favorite_button(left_frame, plant_id):
+            # update button text, color, and functionality
+            def update_button(is_favorited):
+                if is_favorited:
+                    # Set to "Remove from Favorites"
+                    favorite_button.config(
+                        text="Remove from Favorites",
+                        bg="#32CD32",  # Green
+                        command=lambda: toggle_and_refresh(False)
+                    )
+                else:
+                    # Set to "Add to Favorites"
+                    favorite_button.config(
+                        text="Add to Favorites",
+                        bg="#FF6347",  # Red
+                        command=lambda: toggle_and_refresh(True)
+                    )
+
+            def toggle_and_refresh(current_status):
+                """Toggle the favorite status and update the button."""
+                new_status = toggle_favorites(plant_id)
+                update_button(new_status)
+
+            # Check if the plant is already a favorite when creating the button
+            try:
+                mydb, cursor = connectDB()
+
+                # Check if the user is logged in before checking favorites
+                if not user_id:
+                    messagebox.showinfo("Login Required", "Please log in to add to your favorites.")
+                    print("Ran 2nd function")
+                    return  # Exit if not logged in
+                
+                cursor.execute("SELECT * FROM favourites WHERE `User ID` = %s AND `Plant ID` = %s", (user_id, plant_id))
+                is_favorited = cursor.fetchone() is not None
+            except Exception as e:
+                print(f"Error: {e}")
+                messagebox.showerror("Database Error", f"An error occurred: {e}")
+                is_favorited = False
+            finally:
+                if mydb:
+                    mydb.close()
+
+            # Create the button
+            favorite_button = Button(
+                left_frame,
+                font=("Arial", 12, "bold"),
+                fg="white",  # Text color
+                activeforeground="white",
+                relief="raised",
+                borderwidth=2
+            )
+            favorite_button.pack(
+                side="bottom",
+                pady=20,
+                padx=10,
+                fill="x"
+            )
+            update_button(is_favorited)  # Initialize with the current status
+
+        create_or_update_favorite_button(left_frame, plant_id)
 
         # Image
         path = get_image_path(plant_id)
