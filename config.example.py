@@ -10,4 +10,3 @@ DB_NAME = 'your_db_name'
 
 # Other configurations
 DEBUG = True
-SECRET_KEY = 'your_secret_key'
