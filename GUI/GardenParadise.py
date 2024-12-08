@@ -185,10 +185,41 @@ def open_login_screen():
     app_title.pack(padx=10, pady=10, side="top")
     login_title = Label(main_container, text="Login", font=("Arial", 12, "bold"))
     login_title.pack(padx=10, pady=10, side="top")
-    username_entry = Entry(main_container)
+
+    # initializes user and password entry boxes with username and password
+    username_entry = Entry(main_container, text="Username")
+    username_entry.insert(0, "Username")
     username_entry.pack(padx=10, pady=10, side="top")
-    password_entry = Entry(main_container, show="*")
+
+    password_entry = Entry(main_container, show="*", text="Password")
+    password_entry.insert(0, "Password")
     password_entry.pack(padx=10, pady=10, side="top")
+
+    # event handlers so that the entry box clears once the user clicks on them
+    def on_username_click(event):
+        if username_entry.get() == "Username":
+            username_entry.delete(0, END)
+
+    def on_password_click(event):
+        if password_entry.get() == "Password":
+            password_entry.delete(0, END)
+
+    # Bind the focus event to the entries
+    username_entry.bind("<FocusIn>", on_username_click)
+    password_entry.bind("<FocusIn>", on_password_click)
+
+    # event handlers so entry box resets once user clicks OUT of them
+    def on_username_blur(event):
+        if username_entry.get() == "":
+            username_entry.insert(0, "Username")
+
+    def on_password_blur(event):
+        if password_entry.get() == "":
+            password_entry.insert(0, "Password")
+
+    # Bind focus event to entries
+    username_entry.bind("<FocusOut>", on_username_blur)
+    password_entry.bind("<FocusOut>", on_password_blur)
 
     login_button = Button(main_container, text="Login", font=("Arial", 10, "bold"), fg="white", bg="#06402B", command=lambda:validate_login(username_entry.get(),password_entry.get(), login_window))
     login_button.pack(padx=10, pady=10, side="top")
@@ -574,85 +605,4 @@ def show_plants(plants):
             plant_frame.propagate(False)
 
             # Image
-            image = Image.open(r"C:\Users\linns\OneDrive\Desktop\Relational Database\GardenParadise\Data\cute-pot.png")
-            resize_image = image.resize((80, 80))  # Resize to a larger size if 10x10 is too small
-            img = ImageTk.PhotoImage(resize_image)  # Use ImageTk.PhotoImage, not PhotoImage
-
-            # Add the image to a Label
-            image_label = Label(plant_frame, image=img, bg="lightgray")
-            image_label.image = img  #Keep a reference to prevent garbage collection
-            image_label.pack(anchor="center", padx=5, pady=5)
-                
-            # Display common name
-            common_label = Label(plant_frame, text=f"{common_name}", font=("Arial", 11, "bold"), bg="lightgray")
-            common_label.pack(anchor="center", padx=5, pady=2)
-
-            # Display botanical name
-            botanical_label = Label(plant_frame, text=f"{botanical_name}", font=("Arial", 11, "italic"), bg="lightgray")
-            botanical_label.pack(anchor="center", padx=5, pady=2)
-
-            # More info Button
-            more_info_button = Button(plant_frame, text="More info", font=("Arial", 8), command=lambda plant_id=plant_id: show_selected_plant(plant_id))
-            more_info_button.pack(anchor="center", padx=5, pady=10)
-
-
-#Clear existing widgets in the scrollable frame and entry
-def clear_entry_and_frame():
-    for widget in scrollable_frame.winfo_children():
-        widget.destroy()
-    search_entry.delete(0, 'end')
-
-def clear_frame():
-    for widget in scrollable_frame.winfo_children():
-        widget.destroy()
-    for i in range(len(dropdown_labels)):
-        dropdown_options[i].set("")
-
-def clear_all_search(): 
-    clear_entry_and_frame() 
-    for i in range(len(dropdown_labels)):
-        dropdown_options[i].set("")
-
-#Showing advanced search results
-def show_advanced_search():
-
-    clear_entry_and_frame()
-    plants = fetch_plant_results()
-    show_plants(plants)
-
-def show_entry_search(event=None):
-
-    clear_frame()
-    plant_name = search_entry.get().strip()
-    plants = get_plants_by_search(plant_name)
-    show_plants(plants)
-
-#Find plant search button
-find_plant_button = Button(search_frame, text="Find plant", font=("Arial", 12), command=show_advanced_search)
-find_plant_button.grid(padx=10, pady=10)
-
-clear_button = Button(search_frame, text="Clear all", font=("Arial", 12, "bold"), bg="#06402B", fg="white", command=clear_all_search)
-clear_button.place(relx=0.5, rely=0.95, anchor="s")
-
-#Search plant button
-search_button = Button(search_frame, text="Search", font=("Arial", 12), command=show_entry_search)
-search_button.grid(row=1, column=0, padx=(10, 10), pady=10)  # Place next to entry
-search_entry.bind('<Return>', show_entry_search)
-
-
-
-window.mainloop()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            image = Image.open(r"C:\Users\linns\OneDrive\Desktop\Relational Database\
