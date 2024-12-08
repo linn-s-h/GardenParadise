@@ -55,7 +55,7 @@ def get_column_values(column_name):
 def get_plants_by_search(plant_name):
     mydb, cursor = connectDB()
     query = """
-    SELECT `Common Name`, `Botanical Name`, `plant_id`
+    SELECT `Common Name`, `Botanical Name`, `Plant ID`
     FROM plants
     WHERE `Common Name` LIKE %s OR `Botanical Name` LIKE %s
     ORDER BY `Common Name` ASC
@@ -74,11 +74,17 @@ def get_image_path(plant_id):
     JOIN plants p ON p.`Image ID` = img.`Image ID`
     WHERE p.`Plant ID` LIKE %s
     """
-    cursor.execute(query, (f"{plant_id}"))
-    value = mydb.close()
-    return value
-
-
+    cursor.execute(query, (f"{plant_id}",))
+    value = cursor.fetchone()
+    try:
+        if value:
+            relative_path = value[0].strip()  # Get the relative path from the database
+            full_path = os.path.join(BASE_IMAGE_DIR, relative_path)  # Combine base directory with relative path
+            return full_path
+        else:
+            return None
+    finally:
+        mydb.close()
 
 ###############################################################
 
@@ -435,7 +441,7 @@ def fetch_plant_results():
     mydb, cursor = connectDB()
     results = []
     query = """
-        SELECT `Common Name`, `Botanical Name`, `plant_id`
+        SELECT `Common Name`, `Botanical Name`, `Plant ID`
         FROM plants
         WHERE 1+1
     """
@@ -470,7 +476,7 @@ def show_selected_plant(plant_id):
     query = """
     SELECT `Common Name`, `Botanical Name`, `Plant Type`, `Climate Zones`, `Flower Colour`, `Water Needs`, `Light Needs`, `Soil Type`, `Maintenance`, `Foliage Colour`, `Perfume`, `Aromatic`, `Edible`, `Notes`
     FROM plants
-    WHERE `plant_id` = %s;
+    WHERE `Plant ID` = %s
     """
     cursor.execute(query, (plant_id,))
     plant_details = cursor.fetchone()  # Fetch the details of the selected plant
@@ -513,9 +519,11 @@ def show_selected_plant(plant_id):
 
 
         # Image
-        image = Image.open(r"/Users/joaquingarcia/Documents/31305 Relational Databases/GardenParadise/Data/cute-pot.png")
-        resize_image = image.resize((100, 100))  # Resize to a larger size if 10x10 is too small
-        img = ImageTk.PhotoImage(resize_image)  # Use ImageTk.PhotoImage, not PhotoImage
+        path = get_image_path(plant_id)
+        image = Image.open(path)
+        #print(f"Retrieved path for Plant ID {plant_id}: {path}")
+        resize_image = image.resize((100, 100)) 
+        img = ImageTk.PhotoImage(resize_image) 
 
         # Add the image to a Label
         image_label = Label(left_frame, image=img, bg="white")
@@ -711,9 +719,11 @@ def show_plants(plants):
             plant_frame.propagate(False)
 
             # Image
-            image = Image.open(r"C:\Users\linns\OneDrive\Desktop\Relational Database\GardenParadise\Data\cute-pot.png")
-            resize_image = image.resize((80, 80))  # Resize to a larger size if 10x10 is too small
-            img = ImageTk.PhotoImage(resize_image)  # Use ImageTk.PhotoImage, not PhotoImage
+            path = get_image_path(plant_id)
+            image = Image.open(path)
+            #print(f"Retrieved path for Plant ID {plant_id}: {path}")
+            resize_image = image.resize((80, 80)) 
+            img = ImageTk.PhotoImage(resize_image)  
 
             # Add the image to a Label
             image_label = Label(plant_frame, image=img, bg="lightgray")
