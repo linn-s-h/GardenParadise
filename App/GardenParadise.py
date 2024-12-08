@@ -13,8 +13,6 @@ user_id = None
 favorites_window = None
 favorites_frame = None
 
-BASE_IMAGE_DIR = r"C:\Users\linns\OneDrive\Desktop\Relational Database\GardenParadise\Data"
-
 #Connection code 
 def connectDB():
     mydb = mysql.connector.connect(
