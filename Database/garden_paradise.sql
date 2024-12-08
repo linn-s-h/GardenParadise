@@ -85,6 +85,8 @@ ALTER TABLE plants
 ADD COLUMN `Image ID` 
 INT NOT NULL AFTER `Butterfly Type`;
 
+ALTER TABLE plants  `plant_id` = "Plant ID";
+
 #Updating rows to corresponding ids
 UPDATE plants
 SET `Image ID` = (SELECT images.`Image ID` 

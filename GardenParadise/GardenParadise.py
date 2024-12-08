@@ -435,6 +435,7 @@ for i in range(len(dropdown_labels)):
     dropdown.config(width=20, bg="white")
     dropdown.grid(row=4 + (2 * i), column=0, padx=10, pady=(0, 20), sticky="ew")
 
+#start here
 #Getting results from advanced search
 def fetch_plant_results():
 
@@ -785,7 +786,6 @@ clear_button.place(relx=0.5, rely=0.95, anchor="s")
 search_button = Button(search_frame, text="Search", font=("Arial", 12), command=show_entry_search)
 search_button.grid(row=1, column=0, padx=(10, 10), pady=10)  # Place next to entry
 search_entry.bind('<Return>', show_entry_search)
-
 
 
 window.mainloop()
