@@ -227,7 +227,7 @@ def update_menu_buttons():
         login_button = Button(buttons_frame, text="Login", font=("Arial", 12), command=open_login_screen)
         login_button.pack(padx=10, pady=20, side="right")
         
-        welcome_label = Label(buttons_frame, text="Welcome", font=("Arial", 14), bg="#06402B", fg="white")
+        welcome_label = Label(buttons_frame, text="Welcome to your new paradise!", font=("Arial", 14), bg="#06402B", fg="white")
         welcome_label.pack(padx=10, pady=10, side="right")
 
     else:
