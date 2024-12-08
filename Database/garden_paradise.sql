@@ -124,9 +124,20 @@ CREATE TABLE IF NOT EXISTS users (
     `password` VARCHAR(255) NOT NULL
     );
     
+# Alter users table add first_name
+ALTER TABLE users ADD COLUMN `first_name` VARCHAR(50) NOT NULL AFTER username;
+
+# Alter users table add last_name
+ALTER TABLE users ADD COLUMN `last_name` VARCHAR(50) NOT NULL AFTER first_name;
+ALTER TABLE users DROP COLUMN `last_name`;
+
 # Sample "new user" insert query
 INSERT INTO users (username, `password`)
 	VALUES ('joaquinbgarcia', 'testing');
     
+UPDATE users SET first_name = "Joaquin" WHERE username = "joaquinbgarcia" AND `password` = "testing";
+UPDATE users SET last_name = "Garcia" WHERE username = "joaquinbgarcia" AND `password` = "testing";
+    
 # Sample user retrieval
-SELECT user_id, username, `password` FROM users WHERE username = "joaquinbgarcia";
+SELECT * FROM users WHERE username = "joaquinbgarcia";
+SELECT * FROM users;
