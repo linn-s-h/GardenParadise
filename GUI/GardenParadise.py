@@ -1,13 +1,10 @@
 import mysql.connector
+import config
 from tkinter import *
 from tkinter import PhotoImage
 from tkinter import messagebox
 from PIL import Image, ImageTk
 
-DB_HOST = "localhost"
-DB_USER = "root"
-DB_PASSWORD = "Clownpokemon8"
-DB_DATABASE = "mydb"
 logged_in_user = None
 user_first_name = None
 user_last_name = None
@@ -16,10 +13,10 @@ user_last_name = None
 def connectDB():
     mydb = mysql.connector.connect(
 
-        host = DB_HOST,
-        user = DB_USER,
-        passwd = DB_PASSWORD,
-        database = DB_DATABASE
+        host = config.DB_HOST,
+        user = config.DB_USER,
+        passwd = config.DB_PASSWORD,
+        database = config.DB_DATABASE
     )
     mycursor = mydb.cursor()
     return mydb, mycursor
@@ -294,10 +291,13 @@ def open_login_screen():
 
     # initializes user and password entry boxes with username and password
     username_entry = Entry(main_container, text="Username")
+    # Reset entry fields before showing the window
+    username_entry.delete(0, END)  # Clear the username field
     username_entry.insert(0, "Username")
     username_entry.pack(padx=10, pady=10, side="top")
 
     password_entry = Entry(main_container, show="*", text="Password")
+    password_entry.delete(0, END)  # Clear the password field
     password_entry.insert(0, "Password")
     password_entry.pack(padx=10, pady=10, side="top")
 
