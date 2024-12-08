@@ -827,13 +827,13 @@ def show_plants(plants):
             path = get_image_path(plant_id)
             image = Image.open(path)
             #print(f"Retrieved path for Plant ID {plant_id}: {path}")
-            resize_image = image.resize((80, 80)) 
+            resize_image = image.resize((100, 100)) 
             img = ImageTk.PhotoImage(resize_image)  
 
             # Add the image to a Label
             image_label = Label(plant_frame, image=img, bg="lightgray")
             image_label.image = img  #Keep a reference to prevent garbage collection
-            image_label.pack(anchor="center", padx=5, pady=5)
+            image_label.pack(anchor="center", padx=2, pady=2)
                 
             # Display common name
             common_label = Label(plant_frame, text=f"{common_name}", font=("Arial", 11, "bold"), bg="lightgray")
