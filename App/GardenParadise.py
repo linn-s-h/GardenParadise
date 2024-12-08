@@ -28,16 +28,14 @@ def connectDB():
 #Function to fetch distinct values from specified column in the plants table
 def get_distinct_values(column_name):
     mydb, cursor = connectDB()
-    cursor.execute(f"SELECT DISTINCT {column_name} FROM plants GROUP BY {column_name} ORDER BY {column_name} ASC")
-    values = [row[0] for row in cursor.fetchall()]
-    mydb.close()
-    return values
-
-#Function to fetch the count of each distinct value
-def get_distinct_values_count(column_name):
-    mydb, cursor = connectDB()
-    cursor.execute(f"SELECT COUNT({column_name}), (SELECT DISTINCT {column_name}) FROM plants GROUP BY {column_name};")
-    values = [row[0] for row in cursor.fetchall()]
+    query = f"""
+        SELECT {column_name}, COUNT(*)
+        FROM plants
+        GROUP BY {column_name}
+        ORDER BY {column_name} ASC
+    """
+    cursor.execute(query)
+    values = [f"{row[0]} ({row[1]})" for row in cursor.fetchall()]
     mydb.close()
     return values
 
@@ -70,6 +68,7 @@ def get_plants_by_search(plant_name):
     mydb.close()
     return values
 
+#Function that retrieves image path belonging to a plant
 def get_image_path(plant_id):
     mydb, cursor = connectDB()
     query = """
@@ -538,6 +537,15 @@ for i in range(len(dropdown_labels)):
     dropdown.config(width=20, bg="white")
     dropdown.grid(row=4 + (2 * i), column=0, padx=10, pady=(0, 20), sticky="ew")
 
+
+#Function to remove count from clause before passing it to the SQL query
+def extract_raw_value(selected_value):
+    #Remove count in parentheses if present
+    if "(" in selected_value and ")" in selected_value:
+        return selected_value.rsplit("(", 1)[0].strip()  #Split and remove count
+    return selected_value  #Return as-is if no count is present
+
+
 #start here
 #Getting results from advanced search
 def fetch_plant_results():
@@ -552,13 +560,13 @@ def fetch_plant_results():
 
     if dropdown_options[0].get():
         query += " AND `Plant Type` = %s"
-        results.append(dropdown_options[0].get()) #Plant type dropdown
+        results.append(extract_raw_value(dropdown_options[0].get())) #Plant type dropdown
     if dropdown_options[1].get():
         query += " AND `Climate Zones` = %s"
-        results.append(dropdown_options[1].get()) #Climate zones dropdown
+        results.append(extract_raw_value(dropdown_options[1].get())) #Climate zones dropdown
     if dropdown_options[2].get():
         query += " AND `Flower Colour` = %s"
-        results.append(dropdown_options[2].get()) #Flower colour dropdown
+        results.append(extract_raw_value(dropdown_options[2].get())) #Flower colour dropdown
     if dropdown_options[3].get():
         query += f" AND `{dropdown_options[3].get()}` != 'Unknown'" #Tolerance dropdown #Can be Yes, Light, Medium, High
     if dropdown_options[4].get():
