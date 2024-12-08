@@ -117,7 +117,7 @@ def fetch_plant_results():
     if dropdown_options[4].get():
         query += f" AND `{dropdown_options[4].get()}` = 'Yes'" #Attracting dropdown
 
-    query += " LIMIT 16;"
+    query += " LIMIT 50;"
     
     cursor.execute(query, (tuple(results)))
     result = cursor.fetchall()
