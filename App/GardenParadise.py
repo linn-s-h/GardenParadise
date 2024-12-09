@@ -119,7 +119,7 @@ def fetch_plant_results():
     if dropdown_options[4].get():
         query += f" AND `{dropdown_options[4].get()}` = 'Yes'" #Attracting dropdown
 
-    query += " ORDER BY `Common Name`, `Botanical Name`, `Plant ID`"
+    query += " ORDER BY `Common Name`, `Botanical Name`"
     query += "LIMIT 50;"
     
     cursor.execute(query, (tuple(results)))
