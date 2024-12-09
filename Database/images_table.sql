@@ -76,7 +76,8 @@ WHERE `Image` LIKE "No";
 #Set Orchid Default Image
 UPDATE images
 SET `Image Location` = 'plants/orchid/orchid_default.png'
-WHERE `Plant ID` IN (
+WHERE `Image` LIKE "Yes"
+AND `Plant ID` IN (
     SELECT `Plant ID`
     FROM plants
     WHERE `Plant Type` LIKE "%Orchid%"
@@ -96,7 +97,8 @@ AND `Plant ID` IN (
 #Yellow Orchid
 UPDATE images
 SET `Image Location` = 'plants/orchid/orchid_yellow.png'
-WHERE `Plant ID` IN (
+WHERE `Image` LIKE "Yes"
+AND `Plant ID` IN (
     SELECT `Plant ID`
     FROM plants
     WHERE `Plant Type` LIKE "%Orchid%"
@@ -322,6 +324,116 @@ AND `Plant ID` IN (
     FROM plants
     WHERE `Plant Type` LIKE "%Annual%"
     AND `Flower Colour` LIKE "%Orange%"
+);
+
+#Palm default
+UPDATE images
+SET `Image Location` = 'plants/palm/palm_default.png'
+WHERE `Image` LIKE "Yes"
+AND `Plant ID` IN (
+    SELECT `Plant ID`
+    FROM plants
+    WHERE `Plant Type` LIKE "%Palm%"
+);
+
+#Herb default
+UPDATE images
+SET `Image Location` = 'plants/herb/herb_default.png'
+WHERE `Image` LIKE "Yes"
+AND `Plant ID` IN (
+    SELECT `Plant ID`
+    FROM plants
+    WHERE `Plant Type` LIKE "%Herb%"
+);
+
+#Groundcover default
+UPDATE images
+SET `Image Location` = 'plants/groundcover/groundcover_default.png'
+WHERE `Image` LIKE "Yes"
+AND `Plant ID` IN (
+    SELECT `Plant ID`
+    FROM plants
+    WHERE `Plant Type` LIKE "%Groundcover%"
+);
+
+#Grass default
+UPDATE images
+SET `Image Location` = 'plants/grass/grass_default.png'
+WHERE `Image` LIKE "Yes"
+AND `Plant ID` IN (
+    SELECT `Plant ID`
+    FROM plants
+    WHERE `Plant Type` LIKE "%Grass%"
+);
+
+#Fruit default
+UPDATE images
+SET `Image Location` = 'plants/fruit/fruit_default.png'
+WHERE `Image` LIKE "Yes"
+AND `Plant ID` IN (
+    SELECT `Plant ID`
+    FROM plants
+    WHERE `Plant Type` LIKE "%Fruit%"
+);
+
+#Fern default
+UPDATE images
+SET `Image Location` = 'plants/fern/fern_default.png'
+WHERE `Image` LIKE "Yes"
+AND `Plant ID` IN (
+    SELECT `Plant ID`
+    FROM plants
+    WHERE `Plant Type` LIKE "%Fern%"
+);
+
+#Climber default
+UPDATE images
+SET `Image Location` = 'plants/climber/climber_default.png'
+WHERE `Image` LIKE "Yes"
+AND `Plant ID` IN (
+    SELECT `Plant ID`
+    FROM plants
+    WHERE `Plant Type` LIKE "%climber%"
+);
+
+#Bulb default
+UPDATE images
+SET `Image Location` = 'plants/bulb/bulb_default.png'
+WHERE `Image` LIKE "Yes"
+AND `Plant ID` IN (
+    SELECT `Plant ID`
+    FROM plants
+    WHERE `Plant Type` LIKE "%Bulb%"
+);
+
+#Bromeliad default
+UPDATE images
+SET `Image Location` = 'plants/bromeliad/bromeliad_default.png'
+WHERE `Image` LIKE "Yes"
+AND `Plant ID` IN (
+    SELECT `Plant ID`
+    FROM plants
+    WHERE `Plant Type` LIKE "%Bromeliad%"
+);
+
+#Bamboo default
+UPDATE images
+SET `Image Location` = 'plants/bamboo/bamboo_default.png'
+WHERE `Image` LIKE "Yes"
+AND `Plant ID` IN (
+    SELECT `Plant ID`
+    FROM plants
+    WHERE `Plant Type` LIKE "%Bamboo%"
+);
+
+#Aquatic default
+UPDATE images
+SET `Image Location` = 'plants/aquatic/aquatic_default.png'
+WHERE `Image` LIKE "Yes"
+AND `Plant ID` IN (
+    SELECT `Plant ID`
+    FROM plants
+    WHERE `Plant Type` LIKE "%Aquatic%"
 );
 
 SET SQL_SAFE_UPDATES = 1;
