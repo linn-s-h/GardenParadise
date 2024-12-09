@@ -61,11 +61,13 @@ def get_plants_by_search(plant_name):
     query = """
     SELECT `Common Name`, `Botanical Name`, `Plant ID`
     FROM plants
-    WHERE `Common Name` LIKE %s OR `Botanical Name` LIKE %s
+    WHERE `Common Name` LIKE %s 
+    OR `Botanical Name` LIKE %s 
+    OR `Plant Type` LIKE %s
     ORDER BY `Common Name` ASC
-    LIMIT 15;
+    LIMIT 50;
     """
-    cursor.execute(query, (f"%{plant_name}%", f"%{plant_name}%",))
+    cursor.execute(query, (f"%{plant_name}%", f"%{plant_name}%", f"%{plant_name}%",))
     values = cursor.fetchall()
     mydb.close()
     return values
