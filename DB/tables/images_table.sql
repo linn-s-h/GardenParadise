@@ -1,7 +1,7 @@
 ############################### CREATING IMAGES TABLE ############################
 
 #Create table
-CREATE TABLE images (
+CREATE TABLE IF NOT EXISTS images (
 	`Image ID` INT NOT NULL AUTO_INCREMENT, 
     `Plant ID` INT,
     `Image` TEXT,
@@ -22,24 +22,22 @@ ALTER TABLE plants
 ADD COLUMN `Image ID` 
 INT NOT NULL AFTER `Butterfly Type`;
 
+SET SQL_SAFE_UPDATES = 0;
+
 #Updating rows to corresponding ids
 UPDATE plants
 SET `Image ID` = (SELECT images.`Image ID` 
                   FROM images 
-                  WHERE images.`Plant ID` = plants.`Plant ID`);
- 
+                  WHERE images.`Plant ID` = plants.`Plant ID`
+                  LIMIT 1);
+                  
+SET SQL_SAFE_UPDATES = 1;
+
 #Modifying foreign key      
 ALTER TABLE plants 
 ADD CONSTRAINT fk_images_id
 FOREIGN KEY (`Image ID`) 
 REFERENCES images(`Image ID`);
-
-#Commands when inserts goes wrong
-ALTER TABLE plants DROP CONSTRAINT fk_images_id;
-ALTER TABLE plants DROP FOREIGN KEY `Image ID`;
-ALTER TABLE plants DROP COLUMN `Image ID`;
-
-SELECT * FROM images;
 
 #Deleted columns from plants that have been moved to images table
 ALTER TABLE plants
@@ -56,6 +54,8 @@ ALTER TABLE images
 DROP COLUMN `Image Owner`,
 DROP COLUMN `Herb Images Change To`,
 DROP COLUMN `Why Photo Removed`;
+
+SELECT * FROM images;
 
 ############################# ADDING IMAGES ###########################
   
@@ -437,3 +437,6 @@ AND `Plant ID` IN (
 );
 
 SET SQL_SAFE_UPDATES = 1;
+
+SELECT * FROM plants;
+SELECT * FROM images;
