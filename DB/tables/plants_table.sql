@@ -6,7 +6,7 @@ Creation!
 
 */
 CREATE DATABASE garden_paradise;
-USE garde_paradise;
+USE garden_paradise;
 
 ########################### CREATING PLANTS TABLE #########################
 
