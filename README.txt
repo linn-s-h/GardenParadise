@@ -1,12 +1,16 @@
-i) Create the DB, tables and populate them. See (DB AND TABLES CREATION) bellow for instructions
+i) Create the DB, tables and populate them. See (DB AND TABLES CREATION) at the bottom of this file for instructions
+
 ii) Create a virtual environment by loading all the required packages contained in the file requirements.txt
 	pip install -r requirements-txt
+
 iii) Update config.py in the GUI folder by changing the following values: 
 	DB_HOST
 	DB_USER
 	DB_PASSWORD
 	BASE_IMAGE_DIR
+
 iiii) Execute group1-main.py to start the GUI
+
 
 DB AND TABLES CREATION
 
