@@ -3,7 +3,7 @@ i) Create the DB and tables needed. See DB AND TABLES CREATION at the bottom of 
 ii) Create a virtual environment by loading all the required packages contained in the file requirements.txt
 	pip install -r requirements-txt / py -m pip install -r requirements.txt
 
-iii) Update config.py in the GUI folder by changing the following values: 
+iii) Update config.py in the GUI folder by changing the following variables: 
 	DB_HOST
 	DB_USER
 	DB_PASSWORD
