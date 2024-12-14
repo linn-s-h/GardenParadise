@@ -1,17 +1,21 @@
 import mysql.connector
-import config
 import os
 from tkinter import *
 from tkinter import PhotoImage
 from tkinter import messagebox
 from PIL import Image, ImageTk
+from App import config
 
+logged_in = FALSE
 logged_in_user = None
 user_first_name = None
 user_last_name = None
 user_id = None
 favorites_window = None
 favorites_frame = None
+sign_up_window = None
+login_window = None
+plant_windows = {}
 
 #Connection code 
 def connectDB():
@@ -196,14 +200,6 @@ title_label.pack(padx=20, pady=20, side="left")
 buttons_frame = Frame(menu_frame, bg="#06402B")
 buttons_frame.pack(side="right", fill="y", padx=20)
 
-logged_in = False
-
-#Function that changes status of log in
-def change_login_status(status):
-    global logged_in 
-    logged_in = False
-    update_menu_buttons()
-
 # Function that registers the user into the user table
 def sign_up_user(username, first_name, last_name, password, confirm_password, sign_up_window):
     if not username or not password or not confirm_password:
@@ -241,80 +237,86 @@ def sign_up_user(username, first_name, last_name, password, confirm_password, si
 
 #Function that opens a sign up screen
 def open_sign_up_screen():
-    sign_up_window = Toplevel()
-    sign_up_window.geometry("400x400")
-    sign_up_window.title("Signing up")
+    global sign_up_window
 
-    title_frame = Frame(sign_up_window, bg="#F2F0EF")
-    title_frame.place(relx=0, rely=0, relheight=0.25, relwidth=1, anchor="nw")
+    if sign_up_window and sign_up_window.winfo_exists():
+        sign_up_window.lift()
+        sign_up_window.focus_force()
+    else:
+        sign_up_window = Toplevel()
+        sign_up_window.geometry("400x400")
+        sign_up_window.title("Signing up")
 
-    main_frame = Frame(sign_up_window, bg="#F2F0EF")
-    main_frame.place(relx=0, rely=0.25, relheight=0.65, relwidth=1, anchor="nw")
+        title_frame = Frame(sign_up_window, bg="#F2F0EF")
+        title_frame.place(relx=0, rely=0, relheight=0.25, relwidth=1, anchor="nw")
 
-    bottom_frame = Frame(sign_up_window, bg="#06402B")
-    bottom_frame.place(relx=0, rely=0.9, relheight=0.1, relwidth=1, anchor="nw")
+        main_frame = Frame(sign_up_window, bg="#F2F0EF")
+        main_frame.place(relx=0, rely=0.25, relheight=0.65, relwidth=1, anchor="nw")
 
-    title_container = Frame(title_frame, bg="#F2F0EF")
-    title_container.pack(expand=True)
+        bottom_frame = Frame(sign_up_window, bg="#06402B")
+        bottom_frame.place(relx=0, rely=0.9, relheight=0.1, relwidth=1, anchor="nw")
 
-    main_container = Frame(main_frame, bg="#F2F0EF")
-    main_container.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
+        title_container = Frame(title_frame, bg="#F2F0EF")
+        title_container.pack(expand=True)
 
-    app_title = Label(title_container, text="Garden Paradise", font=("Helvetica", 24, "bold"), fg="#06402B")
-    app_title.pack(padx=10, pady=10)
+        main_container = Frame(main_frame, bg="#F2F0EF")
+        main_container.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
 
-    sign_up_title = Label(title_container, text="Create an account", font=("Arial", 12, "bold"))
-    sign_up_title.pack(padx=10, pady=10)
+        app_title = Label(title_container, text="Garden Paradise", font=("Helvetica", 24, "bold"), fg="#06402B")
+        app_title.pack(padx=10, pady=10)
 
-    username_label = Label(main_container, text="Username:", font=("Arial", 10))
-    username_label.grid(row=2, column=0, padx=10, pady=5, sticky="w")
-    username_entry = Entry(main_container)
-    username_entry.grid(row=2, column=1, padx=10, pady=5, sticky="ew")
+        sign_up_title = Label(title_container, text="Create an account", font=("Arial", 12, "bold"))
+        sign_up_title.pack(padx=10, pady=10)
 
-    first_name_label = Label(main_container, text="First Name:", font=("Arial", 10))
-    first_name_label.grid(row=3, column=0, padx=10, pady=5, sticky="w")
-    first_name_entry = Entry(main_container)
-    first_name_entry.grid(row=3, column=1, padx=10, pady=5, sticky="ew")
+        username_label = Label(main_container, text="Username:", font=("Arial", 10))
+        username_label.grid(row=2, column=0, padx=10, pady=5, sticky="w")
+        username_entry = Entry(main_container)
+        username_entry.grid(row=2, column=1, padx=10, pady=5, sticky="ew")
 
-    first_name_label = Label(main_container, text="Last Name:", font=("Arial", 10))
-    first_name_label.grid(row=4, column=0, padx=10, pady=5, sticky="w")
-    last_name_entry = Entry(main_container)
-    last_name_entry.grid(row=4, column=1, padx=10, pady=5, sticky="ew")
+        first_name_label = Label(main_container, text="First Name:", font=("Arial", 10))
+        first_name_label.grid(row=3, column=0, padx=10, pady=5, sticky="w")
+        first_name_entry = Entry(main_container)
+        first_name_entry.grid(row=3, column=1, padx=10, pady=5, sticky="ew")
 
-    password_label = Label(main_container, text="Password:", font=("Arial", 10))
-    password_label.grid(row=5, column=0, padx=10, pady=5, sticky="w")
-    password_entry = Entry(main_container, show="*")
-    password_entry.grid(row=5, column=1, padx=10, pady=5, sticky="ew")
+        first_name_label = Label(main_container, text="Last Name:", font=("Arial", 10))
+        first_name_label.grid(row=4, column=0, padx=10, pady=5, sticky="w")
+        last_name_entry = Entry(main_container)
+        last_name_entry.grid(row=4, column=1, padx=10, pady=5, sticky="ew")
 
-    confirm_password_label = Label(main_container, text="Confirm Password:", font=("Arial", 10))
-    confirm_password_label.grid(row=6, column=0, padx=10, pady=5, sticky="w")
-    confirm_password_entry = Entry(main_container, show="*")
-    confirm_password_entry.grid(row=6, column=1, padx=10, pady=5, sticky="ew")
+        password_label = Label(main_container, text="Password:", font=("Arial", 10))
+        password_label.grid(row=5, column=0, padx=10, pady=5, sticky="w")
+        password_entry = Entry(main_container, show="*")
+        password_entry.grid(row=5, column=1, padx=10, pady=5, sticky="ew")
 
-    sign_up_button = Button(main_container, text="Sign up", font=("Arial", 10, "bold"),
-                            fg="white", bg="#06402B", command=lambda: sign_up_user(
-                                username_entry.get(),
-                                first_name_entry.get(),
-                                last_name_entry.get(),
-                                password_entry.get(),
-                                confirm_password_entry.get(),
-                                sign_up_window
-                            ))
-    sign_up_button.grid(row=7, column=0, columnspan=2, padx=10, pady=20)
+        confirm_password_label = Label(main_container, text="Confirm Password:", font=("Arial", 10))
+        confirm_password_label.grid(row=6, column=0, padx=10, pady=5, sticky="w")
+        confirm_password_entry = Entry(main_container, show="*")
+        confirm_password_entry.grid(row=6, column=1, padx=10, pady=5, sticky="ew")
 
-    # Bind the Enter key to trigger the sign-up function
-    sign_up_window.bind('<Return>', lambda event: sign_up_user(
-        username_entry.get(), first_name_entry.get(), last_name_entry.get(), password_entry.get(), confirm_password_entry.get(),
-        sign_up_window))
-    
-    sign_up_container = Frame(bottom_frame, bg="#06402B")
-    sign_up_container.pack(expand=True)
-    
-    sign_up_text = Label(sign_up_container, text="Already have an account?", font=("Arial", 10, "bold"), fg="white", bg="#06402B")
-    sign_up_text.pack(padx=10, pady=10, side="left")
+        sign_up_button = Button(main_container, text="Sign up", font=("Arial", 10, "bold"),
+                                fg="white", bg="#06402B", command=lambda: sign_up_user(
+                                    username_entry.get(),
+                                    first_name_entry.get(),
+                                    last_name_entry.get(),
+                                    password_entry.get(),
+                                    confirm_password_entry.get(),
+                                    sign_up_window
+                                ))
+        sign_up_button.grid(row=7, column=0, columnspan=2, padx=10, pady=20)
 
-    login_button = Button(sign_up_container, text="Login", font=("Arial", 10, "bold"), fg="#06402B", bg="white", command=open_login_screen)
-    login_button.pack(padx=10, pady=10, side="left")
+        # Bind the Enter key to trigger the sign-up function
+        sign_up_window.bind('<Return>', lambda event: sign_up_user(
+            username_entry.get(), first_name_entry.get(), last_name_entry.get(), password_entry.get(), confirm_password_entry.get(),
+            sign_up_window))
+        
+        sign_up_container = Frame(bottom_frame, bg="#06402B")
+        sign_up_container.pack(expand=True)
+        
+        sign_up_text = Label(sign_up_container, text="Already have an account?", font=("Arial", 10, "bold"), fg="white", bg="#06402B")
+        sign_up_text.pack(padx=10, pady=10, side="left")
+
+        login_button = Button(sign_up_container, text="Login", font=("Arial", 10, "bold"), fg="#06402B", bg="white", command=open_login_screen)
+        login_button.pack(padx=10, pady=10, side="left")
 
 # check if login credentials match a registered user in the database
 def validate_login(username, password, login_window):
@@ -335,6 +337,11 @@ def validate_login(username, password, login_window):
             messagebox.showinfo("Login Successful", f"Welcome, {user_first_name} {user_last_name}!")
             login_window.destroy()
             update_menu_buttons()
+            for plant_window in plant_windows.values():
+                if plant_window.winfo_exists():
+                    update_favorite_button(plant_window, None, plant_window.plant_id)
+
+
         else:
             messagebox.showerror("Login Failed", "Invalid username or password.")
             return False
@@ -348,104 +355,115 @@ def validate_login(username, password, login_window):
 
 #Function that opens a log in screen
 def open_login_screen():
-    login_window = Toplevel()
-    login_window.geometry("600x500")
-    login_window.title("Logging in") 
+    global login_window
 
-    #Content of screen
-    main_frame = Frame(login_window, bg="#F2F0EF")
-    main_frame.place(relx=0, rely=0, relheight=0.9, relwidth=1, anchor="nw")  # Top-left alignment for main frame
+    if login_window and login_window.winfo_exists():
+        login_window.lift()
+        login_window.focus_force()
+    else:
+        login_window = Toplevel()
+        login_window.geometry("600x500")
+        login_window.title("Logging in") 
 
-    bottom_frame = Frame(login_window, bg="#06402B")
-    bottom_frame.place(relx=0, rely=0.9, relheight=0.1, relwidth=1, anchor="nw")
+        #Content of screen
+        main_frame = Frame(login_window, bg="#F2F0EF")
+        main_frame.place(relx=0, rely=0, relheight=0.9, relwidth=1, anchor="nw")  # Top-left alignment for main frame
 
-    main_container = Frame(main_frame, bg="#F2F0EF")
-    main_container.pack(expand=True)
+        bottom_frame = Frame(login_window, bg="#06402B")
+        bottom_frame.place(relx=0, rely=0.9, relheight=0.1, relwidth=1, anchor="nw")
 
-    sign_up_container = Frame(bottom_frame, bg="#06402B")
-    sign_up_container.pack(expand=True)
+        main_container = Frame(main_frame, bg="#F2F0EF")
+        main_container.pack(expand=True)
 
-    app_title = Label(main_container, text="Garden Paradise", font=("Helvetica", 24, "bold"), fg="#06402B")
-    app_title.pack(padx=10, pady=10, side="top")
-    login_title = Label(main_container, text="Login", font=("Arial", 12, "bold"))
-    login_title.pack(padx=10, pady=10, side="top")
+        sign_up_container = Frame(bottom_frame, bg="#06402B")
+        sign_up_container.pack(expand=True)
 
-    # initializes user and password entry boxes with username and password
-    username_entry = Entry(main_container, text="Username")
-    # Reset entry fields before showing the window
-    username_entry.delete(0, END)  # Clear the username field
-    username_entry.insert(0, "Username")
-    username_entry.pack(padx=10, pady=10, side="top")
+        app_title = Label(main_container, text="Garden Paradise", font=("Helvetica", 24, "bold"), fg="#06402B")
+        app_title.pack(padx=10, pady=10, side="top")
+        login_title = Label(main_container, text="Login", font=("Arial", 12, "bold"))
+        login_title.pack(padx=10, pady=10, side="top")
 
-    password_entry = Entry(main_container, show="*", text="Password")
-    password_entry.delete(0, END)  # Clear the password field
-    password_entry.insert(0, "Password")
-    password_entry.pack(padx=10, pady=10, side="top")
+        # initializes user and password entry boxes with username and password
+        username_entry = Entry(main_container, text="Username")
+        # Reset entry fields before showing the window
+        username_entry.delete(0, END)  # Clear the username field
+        username_entry.insert(0, "Username")
+        username_entry.pack(padx=10, pady=10, side="top")
 
-    # event handlers so that the entry box clears once the user clicks on them
-    def on_username_click(event):
-        if username_entry.get() == "Username":
-            username_entry.delete(0, END)
+        password_entry = Entry(main_container, show="*", text="Password")
+        password_entry.delete(0, END)  # Clear the password field
+        password_entry.insert(0, "Password")
+        password_entry.pack(padx=10, pady=10, side="top")
 
-    def on_password_click(event):
-        if password_entry.get() == "Password":
-            password_entry.delete(0, END)
+        # event handlers so that the entry box clears once the user clicks on them
+        def on_username_click(event):
+            if username_entry.get() == "Username":
+                username_entry.delete(0, END)
 
-    # Bind the focus event to the entries
-    username_entry.bind("<FocusIn>", on_username_click)
-    password_entry.bind("<FocusIn>", on_password_click)
+        def on_password_click(event):
+            if password_entry.get() == "Password":
+                password_entry.delete(0, END)
 
-    # event handlers so entry box resets once user clicks OUT of them
-    def on_username_blur(event):
-        if username_entry.get() == "":
-            username_entry.insert(0, "Username")
+        # Bind the focus event to the entries
+        username_entry.bind("<FocusIn>", on_username_click)
+        password_entry.bind("<FocusIn>", on_password_click)
 
-    def on_password_blur(event):
-        if password_entry.get() == "":
-            password_entry.insert(0, "Password")
+        # event handlers so entry box resets once user clicks OUT of them
+        def on_username_blur(event):
+            if username_entry.get() == "":
+                username_entry.insert(0, "Username")
 
-    # Bind focus event to entries
-    username_entry.bind("<FocusOut>", on_username_blur)
-    password_entry.bind("<FocusOut>", on_password_blur)
+        def on_password_blur(event):
+            if password_entry.get() == "":
+                password_entry.insert(0, "Password")
 
-    username_entry.bind(
-        '<Return>', 
-        lambda event: validate_login(username_entry.get(), password_entry.get(), login_window)
-    )
-    password_entry.bind(
-        '<Return>', 
-        lambda event: validate_login(username_entry.get(), password_entry.get(), login_window)
-    )
+        # Bind focus event to entries
+        username_entry.bind("<FocusOut>", on_username_blur)
+        password_entry.bind("<FocusOut>", on_password_blur)
 
-    login_button = Button(main_container, text="Login", font=("Arial", 10, "bold"), fg="white", bg="#06402B", command=lambda: validate_login(username_entry.get(),password_entry.get(), login_window))
-    login_button.pack(padx=10, pady=10, side="top")
+        username_entry.bind(
+            '<Return>', 
+            lambda event: validate_login(username_entry.get(), password_entry.get(), login_window)
+        )
+        password_entry.bind(
+            '<Return>', 
+            lambda event: validate_login(username_entry.get(), password_entry.get(), login_window)
+        )
 
-    login_button.bind('<Return>', lambda event:validate_login(username_entry.get(),password_entry.get(), login_window))
+        login_button = Button(main_container, text="Login", font=("Arial", 10, "bold"), fg="white", bg="#06402B", command=lambda: validate_login(username_entry.get(),password_entry.get(), login_window))
+        login_button.pack(padx=10, pady=10, side="top")
 
-    sign_up_text = Label(sign_up_container, text="Don't have an account yet?", font=("Arial", 10, "bold"), fg="white", bg="#06402B")
-    sign_up_text.pack(padx=10, pady=10, side="left")
-    sign_up_button = Button(sign_up_container, text="Sign up", font=("Arial", 10, "bold"), fg="#06402B", bg="white", command=open_sign_up_screen)
-    sign_up_button.pack(padx=10, pady=10, side="left")
+        login_button.bind('<Return>', lambda event:validate_login(username_entry.get(),password_entry.get(), login_window))
+
+        sign_up_text = Label(sign_up_container, text="Don't have an account yet?", font=("Arial", 10, "bold"), fg="white", bg="#06402B")
+        sign_up_text.pack(padx=10, pady=10, side="left")
+        sign_up_button = Button(sign_up_container, text="Sign up", font=("Arial", 10, "bold"), fg="#06402B", bg="white", command=open_sign_up_screen)
+        sign_up_button.pack(padx=10, pady=10, side="left")
 
     
 
 
-#Function that alters staus when logging out   
+#Function that alters status when logging out   
 def log_out():
     global logged_in, user_id, user_first_name, user_last_name
-    logged_in = False
+    logged_in = FALSE
     user_id = None
     user_first_name = None
     user_last_name = None
     if favorites_window:
         favorites_window.destroy()
+    # Refreshes all open plant windows by updating the favorites button
+    for plant_window in plant_windows.values():
+        if plant_window.winfo_exists():
+            # Reset the favorites button to default state (e.g., "Add to Favorites")
+            update_favorite_button(plant_window, None, plant_window.plant_id)
+
     messagebox.showinfo("Logged Out", "You have successfully logged out.")
     update_menu_buttons()
 
 
 #Function that updates the displayed menu buttons depending on the login status
 def update_menu_buttons():
-    """Update the buttons in the menu based on login status."""
     global buttons_frame
     for widget in buttons_frame.winfo_children(): 
         widget.destroy() #Delete existing widgets 
@@ -528,13 +546,119 @@ def extract_raw_value(selected_value):
     if "(" in selected_value and ")" in selected_value:
         return selected_value.rsplit("(", 1)[0].strip()  #Split and remove count
     return selected_value  #Return as-is if no count is present
+            
+
+# Function to check if a plant is favorited for a specific user
+def check_if_favorited(user_id, plant_id):
+    try:
+        # Query the database to check if the plant is favorited
+        mydb, cursor = connectDB()
+        cursor.execute("SELECT * FROM favourites WHERE `User ID` = %s AND `Plant ID` = %s", (user_id, plant_id))
+        is_favorited = cursor.fetchone()
+        
+        return is_favorited
+
+    except Exception as e:
+        print(f"Error: {e}")
+        messagebox.showerror("Database Error", f"An error occurred: {e}")
+        return False
+
+    finally:
+        if mydb:
+            mydb.close()
+
+# Function to toggle the favorite status
+def toggle_favorites(plant_id, user_id, plant_window):
+    try:
+        mydb, cursor = connectDB()
+
+        existing_favorite = check_if_favorited(user_id, plant_id)
+
+        if existing_favorite:
+            # If it exists, remove from favorites
+            cursor.execute("DELETE FROM favourites WHERE `User ID` = %s AND `Plant ID` = %s", (user_id, plant_id))
+            mydb.commit()
+            messagebox.showinfo("Success", "Favorite removed successfully!")
+            refresh_favorites()
+            update_favorite_button(plant_window, user_id, plant_id)
+            return False  # Indicate plant is no longer a favorite
+        else:
+            # If not, add to favorites
+            query = "INSERT INTO favourites (`User ID`, `Plant ID`) VALUES (%s, %s);"
+            cursor.execute(query, (user_id, plant_id))
+            mydb.commit()
+            messagebox.showinfo("Success", "Favorite added successfully!")
+            refresh_favorites()
+            update_favorite_button(plant_window, user_id, plant_id)
+            return True  # Indicate plant is now a favorite
+            
+
+    except Exception as e:
+        print(f"Error: {e}")
+        messagebox.showerror("Database Error", f"An error occurred: {e}")
+    finally:
+        if mydb:
+            mydb.close()
+
+# Function to create the favorite button for a plant_window
+def create_favorite_button(left_frame):
+    favorite_button = Button(
+        left_frame,
+        font=("Arial", 12, "bold"),
+        fg="white",
+        activeforeground="white",
+        relief="raised",
+        borderwidth=2
+    )
+    favorite_button.pack(
+        side="bottom",
+        pady=20,
+        padx=10,
+        fill="x"
+    )
+    return favorite_button
+
+# Function to update the favorite button
+def update_favorite_button(plant_window, user_id, plant_id):
+    favorite_button = plant_window.favorite_button
+    if logged_in is FALSE:  # When logged out, show a disabled button with a prompt to log in
+        favorite_button.config(
+            text="Log in to Add to Favorites",
+            bg="#B0C4DE",  # Light gray color to indicate it's disabled
+            state="disabled",  # Disable the button when logged out
+            command=None  # Do nothing on click when logged out
+        )
+    else:
+        # Check if the plant is already favorited
+        is_favorited = check_if_favorited(user_id, plant_id)
+        
+        if is_favorited:
+            favorite_button.config(
+                text="Remove from Favorites",
+                bg="#FF6347",  # Red color
+                command=lambda: toggle_favorites(plant_id, user_id, plant_window),
+                state="active"
+            )
+        else:
+            favorite_button.config(
+                text="Add to Favorites",
+                bg="#32CD32",  # Green color
+                command=lambda: toggle_favorites(plant_id, user_id, plant_window),
+                state="active"
+            )
+
 
 # function that shows more details of a selected plant
-def show_selected_plant(plant_id):
+def show_selected_plant(plant_id, user_id):
+    global plant_windows
     
     plant_details = get_plant_details(plant_id)
 
-    if plant_details:# plant_details:
+    if plant_id in plant_windows and plant_windows[plant_id].winfo_exists():
+        # Bring the existing window to focus
+        plant_windows[plant_id].lift()
+        plant_windows[plant_id].focus_force()
+    else:
         plant_window = Toplevel()
         plant_window.title("")
         plant_window.geometry("800x550")
@@ -543,101 +667,16 @@ def show_selected_plant(plant_id):
         left_frame = Frame(plant_window, bg="#06402B")
         left_frame.place(relx=0, rely=0, relwidth=0.3, relheight=1)
 
-        # Toggle favorites status of the user
-        def toggle_favorites(plant_id):
-            try:
-                mydb, cursor = connectDB()
+        plant_window.favorite_button = create_favorite_button(left_frame)
 
-                if not user_id:
-                    messagebox.showinfo("Login Required", "Please log in to access your Favorites.")
-                    print("Ran 1st function")
-                    return
+        # Store the window reference in the dictionary, favorite_button as attribute of plant_window
+        update_favorite_button(plant_window, user_id, plant_id)
+        plant_window.plant_id = plant_id
+        plant_windows[plant_id] = plant_window
+        
+        
 
-                # Check if the plant is already favorited
-                cursor.execute("SELECT * FROM favourites WHERE `User ID` = %s AND `Plant ID` = %s", (user_id, plant_id))
-                existing_favorite = cursor.fetchone()
-
-                if existing_favorite:
-                    # If it exists, remove from favorites
-                    cursor.execute("DELETE FROM favourites WHERE `User ID` = %s AND `Plant ID` = %s", (user_id, plant_id))
-                    mydb.commit()
-                    messagebox.showinfo("Success", "Favorite removed successfully!")
-                    return False  # Indicate plant is no longer a favorite
-                else:
-                    # If not, add to favorites
-                    query = "INSERT INTO favourites (`User ID`, `Plant ID`) VALUES (%s, %s);"
-                    cursor.execute(query, (user_id, plant_id))
-                    mydb.commit()
-                    messagebox.showinfo("Success", "Favorite added successfully!")
-                    return True  # Indicate plant is now a favorite
-
-            except Exception as e:
-                print(f"Error: {e}")
-                messagebox.showerror("Database Error", f"An error occurred: {e}")
-            finally:
-                if mydb:
-                    mydb.close()
-                if favorites_window and favorites_window.winfo_exists():
-                    refresh_favorites()
-            
-            
-
-        # Create or update favorite button dynamically depending on existing status
-        def create_or_update_favorite_button(left_frame, plant_id):
-            # update button text, color, and functionality
-            def update_button(is_favorited):
-                if is_favorited:
-                    # Set to "Remove from Favorites"
-                    favorite_button.config(
-                        text="Remove from Favorites",
-                        bg="#FF6347",  # Green
-                        command=lambda: toggle_and_refresh(False)
-                    )
-                else:
-                    # Set to "Add to Favorites"
-                    favorite_button.config(
-                        text="Add to Favorites",
-                        bg="#32CD32",  # Red
-                        command=lambda: toggle_and_refresh(True)
-                    )
-
-            def toggle_and_refresh(current_status):
-                """Toggle the favorite status and update the button."""
-                new_status = toggle_favorites(plant_id)
-                update_button(new_status)
-
-            # Check if the plant is already a favorite when creating the button
-            try:
-                mydb, cursor = connectDB()
-                
-                cursor.execute("SELECT * FROM favourites WHERE `User ID` = %s AND `Plant ID` = %s", (user_id, plant_id))
-                is_favorited = cursor.fetchone() is not None
-            except Exception as e:
-                print(f"Error: {e}")
-                messagebox.showerror("Database Error", f"An error occurred: {e}")
-                is_favorited = False
-            finally:
-                if mydb:
-                    mydb.close()
-
-            # Create the button
-            favorite_button = Button(
-                left_frame,
-                font=("Arial", 12, "bold"),
-                fg="white",  # Text color
-                activeforeground="white",
-                relief="raised",
-                borderwidth=2
-            )
-            favorite_button.pack(
-                side="bottom",
-                pady=20,
-                padx=10,
-                fill="x"
-            )
-            update_button(is_favorited)  # Initialize with the current status
-
-        create_or_update_favorite_button(left_frame, plant_id)
+        
 
         # Image
         path = get_image_path(plant_id)
@@ -819,9 +858,8 @@ def show_selected_plant(plant_id):
             # If there are no notes, display a default message
             no_info = Label(notes, text="No extra notes", font=("Arial", 14), bg="grey")
             no_info.pack(pady=5, side="left")
-       
-    else:
-        print("No details found for this plant.")
+        
+        # plant_window.protocol("WM_DELETE_WINDOW", close_info_window)
 
 
 #GUI function that displays the plants after search in scrollable_frame
@@ -860,7 +898,7 @@ def show_plants(plants):
             botanical_label.pack(anchor="center", padx=5, pady=2)
 
             # More info Button
-            more_info_button = Button(plant_frame, text="More info", font=("Arial", 8), command=lambda plant_id=plant_id: show_selected_plant(plant_id))
+            more_info_button = Button(plant_frame, text="More info", font=("Arial", 8), command=lambda plant_id=plant_id: show_selected_plant(plant_id, user_id))
             more_info_button.pack(anchor="center", padx=5, pady=10)
 
 #Function that opens favorites screen
@@ -869,6 +907,7 @@ def open_favorites_screen():
 
     if favorites_window and favorites_window.winfo_exists():
         favorites_window.lift()
+        favorites_window.focus_force()
         refresh_favorites()
         return
 
@@ -897,7 +936,7 @@ def display_favorites(parent_frame):
 
 #Function that refreshes the favorite window
 def refresh_favorites():
-    # print("Refresh called successfully")
+    print("Refresh called successfully")
     if not favorites_window or not favorites_window.winfo_exists():
         return
     
@@ -943,7 +982,7 @@ def show_favourite_plants(parent_frame, plants):
             botanical_label.pack(anchor="center", padx=5, pady=2)
 
             # More info Button
-            more_info_button = Button(plant_frame, text="More info", font=("Arial", 8), command=lambda plant_id=plant_id: show_selected_plant(plant_id))
+            more_info_button = Button(plant_frame, text="More info", font=("Arial", 8), command=lambda plant_id=plant_id: show_selected_plant(plant_id, user_id))
             more_info_button.pack(anchor="center", padx=5, pady=10)
 
 #Clear existing widgets in the scrollable frame and entry

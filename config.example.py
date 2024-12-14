@@ -10,3 +10,5 @@ DB_NAME = 'your_db_name'
 
 # Other configurations
 DEBUG = True
+
+BASE_IMAGE_DIR = r"your_base_image_dir"
