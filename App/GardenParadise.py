@@ -12,6 +12,9 @@ user_last_name = None
 user_id = None
 favorites_window = None
 favorites_frame = None
+info_windows = {}
+sign_up_window = None
+login_window = None
 
 #Connection code 
 def connectDB():
@@ -92,7 +95,7 @@ def get_image_path(plant_id):
         mydb.close()
 
 
-#Getting results from advanced search
+#Getting results from advanced search (categorical drop down menus)
 def fetch_plant_results():
 
     mydb, cursor = connectDB()
@@ -125,7 +128,7 @@ def fetch_plant_results():
 
     return result
 
-#To get favourites linked to an user
+#To get favourites linked to a user
 def get_user_favorites(user_id):
     mydb, cursor = connectDB()
     
@@ -195,13 +198,13 @@ buttons_frame.pack(side="right", fill="y", padx=20)
 
 logged_in = False
 
-#Function that changes status of log in
+#Function that changes status of global login window and buttons
 def change_login_status(status):
     global logged_in 
     logged_in = False
     update_menu_buttons()
 
-# Function that registers the user into the user table
+# Database function that registers the user into the user table
 def sign_up_user(username, first_name, last_name, password, confirm_password, sign_up_window):
     if not username or not password or not confirm_password:
         messagebox.showerror("Error", "All fields are required")
@@ -236,82 +239,89 @@ def sign_up_user(username, first_name, last_name, password, confirm_password, si
         if mydb:
             mydb.close()
 
-#Function that opens a sign up screen
+#Function that opens a global sign up screen
 def open_sign_up_screen():
-    sign_up_window = Toplevel()
-    sign_up_window.geometry("400x400")
-    sign_up_window.title("Signing up")
+    global sign_up_window
 
-    title_frame = Frame(sign_up_window, bg="#F2F0EF")
-    title_frame.place(relx=0, rely=0, relheight=0.25, relwidth=1, anchor="nw")
+    if sign_up_window and sign_up_window.winfo_exists():
+        # Either bring the existing window to focus
+        sign_up_window.lift()
+        sign_up_window.focus_force()
+    else:
+        sign_up_window = Toplevel()
+        sign_up_window.geometry("400x400")
+        sign_up_window.title("Signing up")
 
-    main_frame = Frame(sign_up_window, bg="#F2F0EF")
-    main_frame.place(relx=0, rely=0.25, relheight=0.65, relwidth=1, anchor="nw")
+        title_frame = Frame(sign_up_window, bg="#F2F0EF")
+        title_frame.place(relx=0, rely=0, relheight=0.25, relwidth=1, anchor="nw")
 
-    bottom_frame = Frame(sign_up_window, bg="#06402B")
-    bottom_frame.place(relx=0, rely=0.9, relheight=0.1, relwidth=1, anchor="nw")
+        main_frame = Frame(sign_up_window, bg="#F2F0EF")
+        main_frame.place(relx=0, rely=0.25, relheight=0.65, relwidth=1, anchor="nw")
 
-    title_container = Frame(title_frame, bg="#F2F0EF")
-    title_container.pack(expand=True)
+        bottom_frame = Frame(sign_up_window, bg="#06402B")
+        bottom_frame.place(relx=0, rely=0.9, relheight=0.1, relwidth=1, anchor="nw")
 
-    main_container = Frame(main_frame, bg="#F2F0EF")
-    main_container.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
+        title_container = Frame(title_frame, bg="#F2F0EF")
+        title_container.pack(expand=True)
 
-    app_title = Label(title_container, text="Garden Paradise", font=("Helvetica", 24, "bold"), fg="#06402B")
-    app_title.pack(padx=10, pady=10)
+        main_container = Frame(main_frame, bg="#F2F0EF")
+        main_container.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
 
-    sign_up_title = Label(title_container, text="Create an account", font=("Arial", 12, "bold"))
-    sign_up_title.pack(padx=10, pady=10)
+        app_title = Label(title_container, text="Garden Paradise", font=("Helvetica", 24, "bold"), fg="#06402B")
+        app_title.pack(padx=10, pady=10)
 
-    username_label = Label(main_container, text="Username:", font=("Arial", 10))
-    username_label.grid(row=2, column=0, padx=10, pady=5, sticky="w")
-    username_entry = Entry(main_container)
-    username_entry.grid(row=2, column=1, padx=10, pady=5, sticky="ew")
+        sign_up_title = Label(title_container, text="Create an account", font=("Arial", 12, "bold"))
+        sign_up_title.pack(padx=10, pady=10)
 
-    first_name_label = Label(main_container, text="First Name:", font=("Arial", 10))
-    first_name_label.grid(row=3, column=0, padx=10, pady=5, sticky="w")
-    first_name_entry = Entry(main_container)
-    first_name_entry.grid(row=3, column=1, padx=10, pady=5, sticky="ew")
+        username_label = Label(main_container, text="Username:", font=("Arial", 10))
+        username_label.grid(row=2, column=0, padx=10, pady=5, sticky="w")
+        username_entry = Entry(main_container)
+        username_entry.grid(row=2, column=1, padx=10, pady=5, sticky="ew")
 
-    first_name_label = Label(main_container, text="Last Name:", font=("Arial", 10))
-    first_name_label.grid(row=4, column=0, padx=10, pady=5, sticky="w")
-    last_name_entry = Entry(main_container)
-    last_name_entry.grid(row=4, column=1, padx=10, pady=5, sticky="ew")
+        first_name_label = Label(main_container, text="First Name:", font=("Arial", 10))
+        first_name_label.grid(row=3, column=0, padx=10, pady=5, sticky="w")
+        first_name_entry = Entry(main_container)
+        first_name_entry.grid(row=3, column=1, padx=10, pady=5, sticky="ew")
 
-    password_label = Label(main_container, text="Password:", font=("Arial", 10))
-    password_label.grid(row=5, column=0, padx=10, pady=5, sticky="w")
-    password_entry = Entry(main_container, show="*")
-    password_entry.grid(row=5, column=1, padx=10, pady=5, sticky="ew")
+        first_name_label = Label(main_container, text="Last Name:", font=("Arial", 10))
+        first_name_label.grid(row=4, column=0, padx=10, pady=5, sticky="w")
+        last_name_entry = Entry(main_container)
+        last_name_entry.grid(row=4, column=1, padx=10, pady=5, sticky="ew")
 
-    confirm_password_label = Label(main_container, text="Confirm Password:", font=("Arial", 10))
-    confirm_password_label.grid(row=6, column=0, padx=10, pady=5, sticky="w")
-    confirm_password_entry = Entry(main_container, show="*")
-    confirm_password_entry.grid(row=6, column=1, padx=10, pady=5, sticky="ew")
+        password_label = Label(main_container, text="Password:", font=("Arial", 10))
+        password_label.grid(row=5, column=0, padx=10, pady=5, sticky="w")
+        password_entry = Entry(main_container, show="*")
+        password_entry.grid(row=5, column=1, padx=10, pady=5, sticky="ew")
 
-    sign_up_button = Button(main_container, text="Sign up", font=("Arial", 10, "bold"),
-                            fg="white", bg="#06402B", command=lambda: sign_up_user(
-                                username_entry.get(),
-                                first_name_entry.get(),
-                                last_name_entry.get(),
-                                password_entry.get(),
-                                confirm_password_entry.get(),
-                                sign_up_window
-                            ))
-    sign_up_button.grid(row=7, column=0, columnspan=2, padx=10, pady=20)
+        confirm_password_label = Label(main_container, text="Confirm Password:", font=("Arial", 10))
+        confirm_password_label.grid(row=6, column=0, padx=10, pady=5, sticky="w")
+        confirm_password_entry = Entry(main_container, show="*")
+        confirm_password_entry.grid(row=6, column=1, padx=10, pady=5, sticky="ew")
 
-    # Bind the Enter key to trigger the sign-up function
-    sign_up_window.bind('<Return>', lambda event: sign_up_user(
-        username_entry.get(), first_name_entry.get(), last_name_entry.get(), password_entry.get(), confirm_password_entry.get(),
-        sign_up_window))
-    
-    sign_up_container = Frame(bottom_frame, bg="#06402B")
-    sign_up_container.pack(expand=True)
-    
-    sign_up_text = Label(sign_up_container, text="Already have an account?", font=("Arial", 10, "bold"), fg="white", bg="#06402B")
-    sign_up_text.pack(padx=10, pady=10, side="left")
+        sign_up_button = Button(main_container, text="Sign up", font=("Arial", 10, "bold"),
+                                fg="white", bg="#06402B", command=lambda: sign_up_user(
+                                    username_entry.get(),
+                                    first_name_entry.get(),
+                                    last_name_entry.get(),
+                                    password_entry.get(),
+                                    confirm_password_entry.get(),
+                                    sign_up_window
+                                ))
+        sign_up_button.grid(row=7, column=0, columnspan=2, padx=10, pady=20)
 
-    login_button = Button(sign_up_container, text="Login", font=("Arial", 10, "bold"), fg="#06402B", bg="white", command=open_login_screen)
-    login_button.pack(padx=10, pady=10, side="left")
+        # Bind the Enter key to trigger the sign-up function
+        sign_up_window.bind('<Return>', lambda event: sign_up_user(
+            username_entry.get(), first_name_entry.get(), last_name_entry.get(), password_entry.get(), confirm_password_entry.get(),
+            sign_up_window))
+        
+        sign_up_container = Frame(bottom_frame, bg="#06402B")
+        sign_up_container.pack(expand=True)
+        
+        sign_up_text = Label(sign_up_container, text="Already have an account?", font=("Arial", 10, "bold"), fg="white", bg="#06402B")
+        sign_up_text.pack(padx=10, pady=10, side="left")
+
+        login_button = Button(sign_up_container, text="Login", font=("Arial", 10, "bold"), fg="#06402B", bg="white", command=open_login_screen)
+        login_button.pack(padx=10, pady=10, side="left")
 
 # check if login credentials match a registered user in the database
 def validate_login(username, password, login_window):
@@ -343,91 +353,98 @@ def validate_login(username, password, login_window):
         if mydb:
             mydb.close()
 
-#Function that opens a log in screen
+#Function that opens a global log in screen
 def open_login_screen():
-    login_window = Toplevel()
-    login_window.geometry("600x500")
-    login_window.title("Logging in") 
+    global login_window
 
-    #Content of screen
-    main_frame = Frame(login_window, bg="#F2F0EF")
-    main_frame.place(relx=0, rely=0, relheight=0.9, relwidth=1, anchor="nw")  # Top-left alignment for main frame
+    if login_window and login_window.winfo_exists():
+        # Either bring the existing window to focus
+        login_window.lift()
+        login_window.focus_force()
+    else:
+        login_window = Toplevel()
+        login_window.geometry("600x500")
+        login_window.title("Logging in") 
 
-    bottom_frame = Frame(login_window, bg="#06402B")
-    bottom_frame.place(relx=0, rely=0.9, relheight=0.1, relwidth=1, anchor="nw")
+        #Content of screen
+        main_frame = Frame(login_window, bg="#F2F0EF")
+        main_frame.place(relx=0, rely=0, relheight=0.9, relwidth=1, anchor="nw")  # Top-left alignment for main frame
 
-    main_container = Frame(main_frame, bg="#F2F0EF")
-    main_container.pack(expand=True)
+        bottom_frame = Frame(login_window, bg="#06402B")
+        bottom_frame.place(relx=0, rely=0.9, relheight=0.1, relwidth=1, anchor="nw")
 
-    sign_up_container = Frame(bottom_frame, bg="#06402B")
-    sign_up_container.pack(expand=True)
+        main_container = Frame(main_frame, bg="#F2F0EF")
+        main_container.pack(expand=True)
 
-    app_title = Label(main_container, text="Garden Paradise", font=("Helvetica", 24, "bold"), fg="#06402B")
-    app_title.pack(padx=10, pady=10, side="top")
-    login_title = Label(main_container, text="Login", font=("Arial", 12, "bold"))
-    login_title.pack(padx=10, pady=10, side="top")
+        sign_up_container = Frame(bottom_frame, bg="#06402B")
+        sign_up_container.pack(expand=True)
 
-    # initializes user and password entry boxes with username and password
-    username_entry = Entry(main_container, text="Username")
-    # Reset entry fields before showing the window
-    username_entry.delete(0, END)  # Clear the username field
-    username_entry.insert(0, "Username")
-    username_entry.pack(padx=10, pady=10, side="top")
+        app_title = Label(main_container, text="Garden Paradise", font=("Helvetica", 24, "bold"), fg="#06402B")
+        app_title.pack(padx=10, pady=10, side="top")
+        login_title = Label(main_container, text="Login", font=("Arial", 12, "bold"))
+        login_title.pack(padx=10, pady=10, side="top")
 
-    password_entry = Entry(main_container, show="*", text="Password")
-    password_entry.delete(0, END)  # Clear the password field
-    password_entry.insert(0, "Password")
-    password_entry.pack(padx=10, pady=10, side="top")
+        # initializes user and password entry boxes with username and password
+        username_entry = Entry(main_container, text="Username")
+        # Reset entry fields before showing the window
+        username_entry.delete(0, END)  # Clear the username field
+        username_entry.insert(0, "Username")
+        username_entry.pack(padx=10, pady=10, side="top")
 
-    # event handlers so that the entry box clears once the user clicks on them
-    def on_username_click(event):
-        if username_entry.get() == "Username":
-            username_entry.delete(0, END)
+        password_entry = Entry(main_container, show="*", text="Password")
+        password_entry.delete(0, END)  # Clear the password field
+        password_entry.insert(0, "Password")
+        password_entry.pack(padx=10, pady=10, side="top")
 
-    def on_password_click(event):
-        if password_entry.get() == "Password":
-            password_entry.delete(0, END)
+        # event handlers so that the entry box clears once the user clicks on them
+        def on_username_click(event):
+            if username_entry.get() == "Username":
+                username_entry.delete(0, END)
 
-    # Bind the focus event to the entries
-    username_entry.bind("<FocusIn>", on_username_click)
-    password_entry.bind("<FocusIn>", on_password_click)
+        def on_password_click(event):
+            if password_entry.get() == "Password":
+                password_entry.delete(0, END)
 
-    # event handlers so entry box resets once user clicks OUT of them
-    def on_username_blur(event):
-        if username_entry.get() == "":
-            username_entry.insert(0, "Username")
+        # Bind the focus event to the entries
+        username_entry.bind("<FocusIn>", on_username_click)
+        password_entry.bind("<FocusIn>", on_password_click)
 
-    def on_password_blur(event):
-        if password_entry.get() == "":
-            password_entry.insert(0, "Password")
+        # event handlers so entry box resets once user clicks OUT of them
+        def on_username_blur(event):
+            if username_entry.get() == "":
+                username_entry.insert(0, "Username")
 
-    # Bind focus event to entries
-    username_entry.bind("<FocusOut>", on_username_blur)
-    password_entry.bind("<FocusOut>", on_password_blur)
+        def on_password_blur(event):
+            if password_entry.get() == "":
+                password_entry.insert(0, "Password")
 
-    username_entry.bind(
-        '<Return>', 
-        lambda event: validate_login(username_entry.get(), password_entry.get(), login_window)
-    )
-    password_entry.bind(
-        '<Return>', 
-        lambda event: validate_login(username_entry.get(), password_entry.get(), login_window)
-    )
+        # Bind focus event to entries
+        username_entry.bind("<FocusOut>", on_username_blur)
+        password_entry.bind("<FocusOut>", on_password_blur)
 
-    login_button = Button(main_container, text="Login", font=("Arial", 10, "bold"), fg="white", bg="#06402B", command=lambda: validate_login(username_entry.get(),password_entry.get(), login_window))
-    login_button.pack(padx=10, pady=10, side="top")
+        username_entry.bind(
+            '<Return>', 
+            lambda event: validate_login(username_entry.get(), password_entry.get(), login_window)
+        )
+        password_entry.bind(
+            '<Return>', 
+            lambda event: validate_login(username_entry.get(), password_entry.get(), login_window)
+        )
 
-    login_button.bind('<Return>', lambda event:validate_login(username_entry.get(),password_entry.get(), login_window))
+        login_button = Button(main_container, text="Login", font=("Arial", 10, "bold"), fg="white", bg="#06402B", command=lambda: validate_login(username_entry.get(),password_entry.get(), login_window))
+        login_button.pack(padx=10, pady=10, side="top")
 
-    sign_up_text = Label(sign_up_container, text="Don't have an account yet?", font=("Arial", 10, "bold"), fg="white", bg="#06402B")
-    sign_up_text.pack(padx=10, pady=10, side="left")
-    sign_up_button = Button(sign_up_container, text="Sign up", font=("Arial", 10, "bold"), fg="#06402B", bg="white", command=open_sign_up_screen)
-    sign_up_button.pack(padx=10, pady=10, side="left")
+        login_button.bind('<Return>', lambda event:validate_login(username_entry.get(),password_entry.get(), login_window))
+
+        sign_up_text = Label(sign_up_container, text="Don't have an account yet?", font=("Arial", 10, "bold"), fg="white", bg="#06402B")
+        sign_up_text.pack(padx=10, pady=10, side="left")
+        sign_up_button = Button(sign_up_container, text="Sign up", font=("Arial", 10, "bold"), fg="#06402B", bg="white", command=open_sign_up_screen)
+        sign_up_button.pack(padx=10, pady=10, side="left")
 
     
 
 
-#Function that alters staus when logging out   
+#Function that alters global log in status and resets global user details when logging out   
 def log_out():
     global logged_in, user_id, user_first_name, user_last_name
     logged_in = False
@@ -528,295 +545,305 @@ def extract_raw_value(selected_value):
 
 # function that shows more details of a selected plant
 def show_selected_plant(plant_id):
+    global info_windows
     
     plant_details = get_plant_details(plant_id)
 
+     
     if plant_details:# plant_details:
-        plant_window = Toplevel()
-        plant_window.title("")
-        plant_window.geometry("800x550")
-
-        # left frame
-        left_frame = Frame(plant_window, bg="#06402B")
-        left_frame.place(relx=0, rely=0, relwidth=0.3, relheight=1)
-
-        # Toggle favorites status of the user
-        def toggle_favorites(plant_id):
-            try:
-                mydb, cursor = connectDB()
-
-                if not user_id:
-                    messagebox.showinfo("Login Required", "Please log in to access your Favorites.")
-                    print("Ran 1st function")
-                    return
-
-                # Check if the plant is already favorited
-                cursor.execute("SELECT * FROM favourites WHERE `User ID` = %s AND `Plant ID` = %s", (user_id, plant_id))
-                existing_favorite = cursor.fetchone()
-
-                if existing_favorite:
-                    # If it exists, remove from favorites
-                    cursor.execute("DELETE FROM favourites WHERE `User ID` = %s AND `Plant ID` = %s", (user_id, plant_id))
-                    mydb.commit()
-                    messagebox.showinfo("Success", "Favorite removed successfully!")
-                    return False  # Indicate plant is no longer a favorite
-                else:
-                    # If not, add to favorites
-                    query = "INSERT INTO favourites (`User ID`, `Plant ID`) VALUES (%s, %s);"
-                    cursor.execute(query, (user_id, plant_id))
-                    mydb.commit()
-                    messagebox.showinfo("Success", "Favorite added successfully!")
-                    return True  # Indicate plant is now a favorite
-
-            except Exception as e:
-                print(f"Error: {e}")
-                messagebox.showerror("Database Error", f"An error occurred: {e}")
-            finally:
-                if mydb:
-                    mydb.close()
-                if favorites_window and favorites_window.winfo_exists():
-                    refresh_favorites()
-            
-            
-
-        # Create or update favorite button dynamically depending on existing status
-        def create_or_update_favorite_button(left_frame, plant_id):
-            # update button text, color, and functionality
-            def update_button(is_favorited):
-                if is_favorited:
-                    # Set to "Remove from Favorites"
-                    favorite_button.config(
-                        text="Remove from Favorites",
-                        bg="#FF6347",  # Green
-                        command=lambda: toggle_and_refresh(False)
-                    )
-                else:
-                    # Set to "Add to Favorites"
-                    favorite_button.config(
-                        text="Add to Favorites",
-                        bg="#32CD32",  # Red
-                        command=lambda: toggle_and_refresh(True)
-                    )
-
-            def toggle_and_refresh(current_status):
-                """Toggle the favorite status and update the button."""
-                new_status = toggle_favorites(plant_id)
-                update_button(new_status)
-
-            # Check if the plant is already a favorite when creating the button
-            try:
-                mydb, cursor = connectDB()
-                
-                cursor.execute("SELECT * FROM favourites WHERE `User ID` = %s AND `Plant ID` = %s", (user_id, plant_id))
-                is_favorited = cursor.fetchone() is not None
-            except Exception as e:
-                print(f"Error: {e}")
-                messagebox.showerror("Database Error", f"An error occurred: {e}")
-                is_favorited = False
-            finally:
-                if mydb:
-                    mydb.close()
-
-            # Create the button
-            favorite_button = Button(
-                left_frame,
-                font=("Arial", 12, "bold"),
-                fg="white",  # Text color
-                activeforeground="white",
-                relief="raised",
-                borderwidth=2
-            )
-            favorite_button.pack(
-                side="bottom",
-                pady=20,
-                padx=10,
-                fill="x"
-            )
-            update_button(is_favorited)  # Initialize with the current status
-
-        create_or_update_favorite_button(left_frame, plant_id)
-
-        # Image
-        path = get_image_path(plant_id)
-        image = Image.open(path)
-        #print(f"Retrieved path for Plant ID {plant_id}: {path}")
-        resize_image = image.resize((100, 100)) 
-        img = ImageTk.PhotoImage(resize_image) 
-
-        # Add the image to a Label
-        image_label = Label(left_frame, image=img, bg="white")
-        image_label.image = img  #Keep a reference to prevent garbage collection
-        image_label.pack(anchor="center", padx=5, pady=30)
-
-        common_name = Label(left_frame, text=f"Common Name", font=("Arial", 12, "bold"), fg="white", bg=left_frame["bg"]) # so frame inherits bg colour
-        common_name.pack(pady=5)
-
-        common_name_label = Label(left_frame, text=f"{plant_details[0]}", font=("Arial", 12), fg="white", bg=left_frame["bg"])
-        common_name_label.pack(pady=5)
-
-        botanical_name = Label(left_frame, text=f"Botanical Name", font=("Arial", 12, "bold"), fg="white", bg=left_frame["bg"])
-        botanical_name.pack(pady=5)
-        
-        botanical_name_label = Label(left_frame, text=f"{plant_details[1]}", font=("Arial", 12), fg="white", bg=left_frame["bg"])
-        botanical_name_label.pack(pady=5)
-
-        plant_type = Label(left_frame, text=f"Plant Type", font=("Arial", 12, "bold"), fg="white", bg=left_frame["bg"])
-        plant_type.pack(pady=5)
-        
-        plant_type_label = Label(left_frame, text=f"{plant_details[2]}", font=("Arial", 12), fg="white", bg=left_frame["bg"])
-        plant_type_label.pack(pady=5)
-
-        # right frame
-        right_frame = Frame(plant_window, bg="white")
-        right_frame.place(relx=0.3, rely=0, relwidth=0.7, relheight=1)
-
-        # Create the top frame for "Maintenance Information"
-        top_frame = Frame(right_frame, bg="grey", bd=2, relief="solid")  # Border with grey background
-        top_frame.pack(fill="x", padx=10, pady=10, expand=False)
-
-        # Add the label to the top frame
-        top_label = Label(top_frame, text="Maintenance Information", font=("Arial", 14, "bold"), bg="grey")
-        top_label.pack(pady=5, padx=10)
-
-        maintenance_info_frame = Frame(right_frame, bg=right_frame["bg"])
-        maintenance_info_frame.pack(fill="x", padx=10, pady=10)
-
-        # Create the labels and info pairs in a grid layout
-        # Row 1 - "Climate Zone" title and info label
-        climate_zone = Label(maintenance_info_frame, text="Climate Zone", font=("Arial", 12, "bold"), fg="black", bg=right_frame["bg"]) #make any commas separated with a space
-        climate_zone.grid(row=0, column=0, padx=10, pady=5, sticky="w")  # Title in the first row
-
-        climate_zone_label = Label(maintenance_info_frame, text=f"{plant_details[3].replace(',', ', ')}", font=("Arial", 12), fg="black", bg=right_frame["bg"], wraplength=180, justify="left")
-        climate_zone_label.grid(row=1, column=0, padx=10, pady=5, sticky="w")  # Info label underneath
-
-        # Row 2 - "Water Needs" title and info label
-        water_needs = Label(maintenance_info_frame, text="Water Needs", font=("Arial", 12, "bold"), fg="black", bg=right_frame["bg"])
-        water_needs.grid(row=0, column=1, padx=10, pady=5, sticky="w")  # Title in the first row
-
-        water_needs_label = Label(maintenance_info_frame, text=f"{plant_details[5]}", font=("Arial", 12), fg="black", bg=right_frame["bg"])
-        water_needs_label.grid(row=1, column=1, padx=10, pady=5, sticky="w")  # Info label underneath
-
-        # Row 3 - "Light Needs" title and info label
-        light_needs = Label(maintenance_info_frame, text="Light Needs", font=("Arial", 12, "bold"), fg="black", bg=right_frame["bg"])
-        light_needs.grid(row=0, column=2, padx=10, pady=5, sticky="w")  # Title in the first row
-
-        light_needs_label = Label(maintenance_info_frame, text=f"{plant_details[6]}", font=("Arial", 12), fg="black", bg=right_frame["bg"])
-        light_needs_label.grid(row=1, column=2, padx=10, pady=5, sticky="w")  # Info label underneath
-
-        # Row 4 - "Soil Type" title and info label
-        soil_type = Label(maintenance_info_frame, text="Soil Type", font=("Arial", 12, "bold"), fg="black", bg=right_frame["bg"])
-        soil_type.grid(row=2, column=0, padx=10, pady=5, sticky="w")  # Title in the first row
-
-        soil_type_label = Label(maintenance_info_frame, text=f"{plant_details[7].replace(',', ', ')}", font=("Arial", 12), fg="black", bg=right_frame["bg"])
-        soil_type_label.grid(row=3, column=0, padx=10, pady=5, sticky="w")  # Info label underneath
-
-        # Row 5 - "Maintenance Level" title and info label
-        maintenance = Label(maintenance_info_frame, text="Maintenance Level", font=("Arial", 12, "bold"), fg="black", bg=right_frame["bg"])
-        maintenance.grid(row=2, column=1, padx=10, pady=5, sticky="w")  # Title in the first row
-
-        maintenance_label = Label(maintenance_info_frame, text=f"{plant_details[8]}", font=("Arial", 12), fg="black", bg=right_frame["bg"])
-        maintenance_label.grid(row=3, column=1, padx=10, pady=5, sticky="w")  # Info label underneath
-
-        # Create the bottom frame for "Plant Characteristics"
-        bottom_frame = Frame(right_frame, bg="grey", bd=2, relief="solid")  # Border with grey background
-        bottom_frame.pack(fill="x", padx=10, pady=10, expand=False)
-
-        # Add the label to the bottom frame
-        bottom_label = Label(bottom_frame, text="Plant Characteristics", font=("Arial", 14, "bold"), bg="grey")
-        bottom_label.pack(pady=5, padx=10)
-
-        #plant characteristics frame
-        pc_frame = Frame(right_frame, bg=right_frame["bg"])
-        pc_frame.pack(fill="x", padx=10, pady=10)
-
-        # Row 1 - "Flower Colour" Title and info label
-        flower_color = Label(pc_frame, text=f"Flower Color", font=("Arial", 12, "bold"), fg="black", bg=right_frame["bg"])
-        flower_color.grid(row=0, column=0, padx=10, pady=5, sticky="w")  # Title in the first row
-        
-        flower_color_label = Label(pc_frame, text=f"{plant_details[4]}", font=("Arial", 12), fg="black", bg=right_frame["bg"])
-        flower_color_label.grid(row=1, column=0, padx=10, pady=5, sticky="w")  # Info label underneath
-
-        # Row 2 - "Foliage Color" title and info label
-        foliage_color = Label(pc_frame, text="Foliage Color", font=("Arial", 12, "bold"), fg="black", bg=right_frame["bg"])
-        foliage_color.grid(row=0, column=1, padx=10, pady=5, sticky="w")  # Title in the first row
-
-        foliage_color_label = Label(pc_frame, text=f"{plant_details[9]}", font=("Arial", 12), fg="black", bg=right_frame["bg"])
-        foliage_color_label.grid(row=1, column=1, padx=10, pady=5, sticky="w")  # Info label underneath
-
-        # Row 3 - "Perfume" title and info label
-        perfume = Label(pc_frame, text="Perfume", font=("Arial", 12, "bold"), fg="black", bg=right_frame["bg"])
-        perfume.grid(row=0, column=2, padx=10, pady=5, sticky="w")  # Title in the first row
-
-        perfume_label = Label(pc_frame, text=f"{plant_details[10]}", font=("Arial", 12), fg="black", bg=right_frame["bg"])
-        perfume_label.grid(row=1, column=2, padx=10, pady=5, sticky="w")  # Info label underneath
-
-        # Row 4 - "Aromatic" title and info label
-        aromatic = Label(pc_frame, text="Aromatic", font=("Arial", 12, "bold"), fg="black", bg=right_frame["bg"])
-        aromatic.grid(row=2, column=0, padx=10, pady=5, sticky="w")  # Title in the first row
-
-        aromatic_label = Label(pc_frame, text=f"{plant_details[11].replace(',', ', ')}", font=("Arial", 12), fg="black", bg=right_frame["bg"])
-        aromatic_label.grid(row=3, column=0, padx=10, pady=5, sticky="w")  # Info label underneath
-
-        # Row 5 - "Edible" title and info label
-        edible = Label(pc_frame, text="Edible", font=("Arial", 12, "bold"), fg="black", bg=right_frame["bg"])
-        edible.grid(row=2, column=1, padx=10, pady=5, sticky="w")  # Title in the first row
-
-        edible_label = Label(pc_frame, text=f"{plant_details[12]}", font=("Arial", 12), fg="black", bg=right_frame["bg"])
-        edible_label.grid(row=3, column=1, padx=10, pady=5, sticky="w")  # Info label underneath
-
-        # Notes Frame
-        notes = Frame(right_frame, bg="grey", bd=2, relief="solid")
-        notes.pack(fill="x", padx=10, pady=10, expand=False)
-
-        # Add the label to the top frame
-        notes_label = Label(notes, text="Notes:", font=("Arial", 14, "bold"), bg="grey")
-        notes_label.pack(pady=5, padx=(10, 0), side="left")
-
-        if plant_details[13]:
-            notes_text = plant_details[13]
-
-            text_width = len(notes_text)
-            max_width = 50
-
-            if text_width > max_width:
-                notes_info = Label(notes, text="Click to view full notes", font=("Arial", 14, "italic"), fg="blue", bg="grey", cursor="hand2")
-                notes_info.pack(pady=5, padx=10, side="left")
-
-                def show_full_notes():
-                    full_notes_window = Toplevel()
-                    full_notes_window.title(f"{plant_details[0]} Notes")
-
-                    full_notes_window.resizable(True, True)
-                    
-                    full_notes_frame = Frame(full_notes_window, bg="grey")
-                    full_notes_frame.pack(fill=BOTH, expand=TRUE)
-
-                    notes_label = Label(full_notes_frame, text="Notes:", font=("Arial", 14, "bold"), anchor="w", bg="grey", justify="left")
-                    notes_label.pack(padx=10, pady=(10, 0), fill="x")
-                    
-                    # Create the label with text wrapping and justification
-                    full_notes_label = Label(full_notes_frame, 
-                                            text=notes_text, 
-                                            font=("Arial", 14), 
-                                            wraplength=380, 
-                                            justify="left", 
-                                            bg="grey", 
-                                            anchor="w")  # 'anchor="w"' aligns the text to the left
-                    
-                    # Add padding around the label
-                    full_notes_label.pack(padx=10, pady=(0, 10), fill=BOTH, expand=True)
-                
-                notes_info.bind("<Button-1>", lambda e: show_full_notes())
-            
-            else:
-                # If the text fits, just show it normally
-                notes_info = Label(notes, text=notes_text, font=("Arial", 14), bg="grey")
-                notes_info.pack(pady=5, padx=0, side="left")
+        if plant_id in info_windows and info_windows[plant_id].winfo_exists():
+            # Either bring the existing window to focus
+            info_windows[plant_id].lift()
+            info_windows[plant_id].focus_force()
         else:
-            # If there are no notes, display a default message
-            no_info = Label(notes, text="No extra notes", font=("Arial", 14), bg="grey")
-            no_info.pack(pady=5, side="left")
-       
+            plant_window = Toplevel()
+            plant_window.title("")
+            plant_window.geometry("800x550")
+
+            # left frame
+            left_frame = Frame(plant_window, bg="#06402B")
+            left_frame.place(relx=0, rely=0, relwidth=0.3, relheight=1)
+
+            info_windows[plant_id] = plant_window
+
+            # Toggle favorites status of the user
+            def toggle_favorites(plant_id):
+                try:
+                    mydb, cursor = connectDB()
+
+                    if not user_id:
+                        messagebox.showinfo("Login Required", "Please log in to access your Favorites.")
+                        print("Ran 1st function")
+                        return
+
+                    # Check if the plant is already favorited
+                    cursor.execute("SELECT * FROM favourites WHERE `User ID` = %s AND `Plant ID` = %s", (user_id, plant_id))
+                    existing_favorite = cursor.fetchone()
+
+                    if existing_favorite:
+                        # If it exists, remove from favorites
+                        cursor.execute("DELETE FROM favourites WHERE `User ID` = %s AND `Plant ID` = %s", (user_id, plant_id))
+                        mydb.commit()
+                        messagebox.showinfo("Success", "Favorite removed successfully!")
+                        return False  # Indicate plant is no longer a favorite
+                    else:
+                        # If not, add to favorites
+                        query = "INSERT INTO favourites (`User ID`, `Plant ID`) VALUES (%s, %s);"
+                        cursor.execute(query, (user_id, plant_id))
+                        mydb.commit()
+                        messagebox.showinfo("Success", "Favorite added successfully!")
+                        return True  # Indicate plant is now a favorite
+
+                except Exception as e:
+                    print(f"Error: {e}")
+                    messagebox.showerror("Database Error", f"An error occurred: {e}")
+                finally:
+                    if mydb:
+                        mydb.close()
+                    if favorites_window and favorites_window.winfo_exists():
+                        refresh_favorites()
+            
+            
+
+            # Create or update favorite button dynamically depending on existing status
+            def create_or_update_favorite_button(left_frame, plant_id):
+                # update button text, color, and functionality
+                def update_button(is_favorited):
+                    if is_favorited:
+                        # Set to "Remove from Favorites"
+                        favorite_button.config(
+                            text="Remove from Favorites",
+                            bg="#FF6347",  # Green
+                            command=lambda: toggle_and_refresh(False)
+                        )
+                    else:
+                        # Set to "Add to Favorites"
+                        favorite_button.config(
+                            text="Add to Favorites",
+                            bg="#32CD32",  # Red
+                            command=lambda: toggle_and_refresh(True)
+                        )
+
+                # Toggle the favorite status and update menu buttons.
+                def toggle_and_refresh(current_status):
+                    new_status = toggle_favorites(plant_id)
+                    update_button(new_status)
+
+                # Check if the plant is already a favorite when creating the button
+                try:
+                    mydb, cursor = connectDB()
+                    
+                    cursor.execute("SELECT * FROM favourites WHERE `User ID` = %s AND `Plant ID` = %s", (user_id, plant_id))
+                    is_favorited = cursor.fetchone() is not None
+                except Exception as e:
+                    print(f"Error: {e}")
+                    messagebox.showerror("Database Error", f"An error occurred: {e}")
+                    is_favorited = False
+                finally:
+                    if mydb:
+                        mydb.close()
+
+                # Create the button
+                favorite_button = Button(
+                    left_frame,
+                    font=("Arial", 12, "bold"),
+                    fg="white",  # Text color
+                    activeforeground="white",
+                    relief="raised",
+                    borderwidth=2
+                )
+                favorite_button.pack(
+                    side="bottom",
+                    pady=20,
+                    padx=10,
+                    fill="x"
+                )
+                update_button(is_favorited)  # Initialize with the current status
+
+            create_or_update_favorite_button(left_frame, plant_id)
+
+            # Image
+            path = get_image_path(plant_id)
+            image = Image.open(path)
+            #print(f"Retrieved path for Plant ID {plant_id}: {path}")
+            resize_image = image.resize((100, 100)) 
+            img = ImageTk.PhotoImage(resize_image) 
+
+            # Add the image to a Label
+            image_label = Label(left_frame, image=img, bg="white")
+            image_label.image = img  #Keep a reference to prevent garbage collection
+            image_label.pack(anchor="center", padx=5, pady=30)
+
+            common_name = Label(left_frame, text=f"Common Name", font=("Arial", 12, "bold"), fg="white", bg=left_frame["bg"]) # so frame inherits bg colour
+            common_name.pack(pady=5)
+
+            common_name_label = Label(left_frame, text=f"{plant_details[0]}", font=("Arial", 12), fg="white", bg=left_frame["bg"])
+            common_name_label.pack(pady=5)
+
+            botanical_name = Label(left_frame, text=f"Botanical Name", font=("Arial", 12, "bold"), fg="white", bg=left_frame["bg"])
+            botanical_name.pack(pady=5)
+            
+            botanical_name_label = Label(left_frame, text=f"{plant_details[1]}", font=("Arial", 12), fg="white", bg=left_frame["bg"])
+            botanical_name_label.pack(pady=5)
+
+            plant_type = Label(left_frame, text=f"Plant Type", font=("Arial", 12, "bold"), fg="white", bg=left_frame["bg"])
+            plant_type.pack(pady=5)
+            
+            plant_type_label = Label(left_frame, text=f"{plant_details[2]}", font=("Arial", 12), fg="white", bg=left_frame["bg"])
+            plant_type_label.pack(pady=5)
+
+            # right frame
+            right_frame = Frame(plant_window, bg="white")
+            right_frame.place(relx=0.3, rely=0, relwidth=0.7, relheight=1)
+
+            # Create the top frame for "Maintenance Information"
+            top_frame = Frame(right_frame, bg="grey", bd=2, relief="solid")  # Border with grey background
+            top_frame.pack(fill="x", padx=10, pady=10, expand=False)
+
+            # Add the label to the top frame
+            top_label = Label(top_frame, text="Maintenance Information", font=("Arial", 14, "bold"), bg="grey")
+            top_label.pack(pady=5, padx=10)
+
+            maintenance_info_frame = Frame(right_frame, bg=right_frame["bg"])
+            maintenance_info_frame.pack(fill="x", padx=10, pady=10)
+
+            # Create the labels and info pairs in a grid layout
+            # Row 1 - "Climate Zone" title and info label
+            climate_zone = Label(maintenance_info_frame, text="Climate Zone", font=("Arial", 12, "bold"), fg="black", bg=right_frame["bg"]) #make any commas separated with a space
+            climate_zone.grid(row=0, column=0, padx=10, pady=5, sticky="w")  # Title in the first row
+
+            climate_zone_label = Label(maintenance_info_frame, text=f"{plant_details[3].replace(',', ', ')}", font=("Arial", 12), fg="black", bg=right_frame["bg"], wraplength=180, justify="left")
+            climate_zone_label.grid(row=1, column=0, padx=10, pady=5, sticky="w")  # Info label underneath
+
+            # Row 2 - "Water Needs" title and info label
+            water_needs = Label(maintenance_info_frame, text="Water Needs", font=("Arial", 12, "bold"), fg="black", bg=right_frame["bg"])
+            water_needs.grid(row=0, column=1, padx=10, pady=5, sticky="w")  # Title in the first row
+
+            water_needs_label = Label(maintenance_info_frame, text=f"{plant_details[5]}", font=("Arial", 12), fg="black", bg=right_frame["bg"])
+            water_needs_label.grid(row=1, column=1, padx=10, pady=5, sticky="w")  # Info label underneath
+
+            # Row 3 - "Light Needs" title and info label
+            light_needs = Label(maintenance_info_frame, text="Light Needs", font=("Arial", 12, "bold"), fg="black", bg=right_frame["bg"])
+            light_needs.grid(row=0, column=2, padx=10, pady=5, sticky="w")  # Title in the first row
+
+            light_needs_label = Label(maintenance_info_frame, text=f"{plant_details[6]}", font=("Arial", 12), fg="black", bg=right_frame["bg"])
+            light_needs_label.grid(row=1, column=2, padx=10, pady=5, sticky="w")  # Info label underneath
+
+            # Row 4 - "Soil Type" title and info label
+            soil_type = Label(maintenance_info_frame, text="Soil Type", font=("Arial", 12, "bold"), fg="black", bg=right_frame["bg"])
+            soil_type.grid(row=2, column=0, padx=10, pady=5, sticky="w")  # Title in the first row
+
+            soil_type_label = Label(maintenance_info_frame, text=f"{plant_details[7].replace(',', ', ')}", font=("Arial", 12), fg="black", bg=right_frame["bg"])
+            soil_type_label.grid(row=3, column=0, padx=10, pady=5, sticky="w")  # Info label underneath
+
+            # Row 5 - "Maintenance Level" title and info label
+            maintenance = Label(maintenance_info_frame, text="Maintenance Level", font=("Arial", 12, "bold"), fg="black", bg=right_frame["bg"])
+            maintenance.grid(row=2, column=1, padx=10, pady=5, sticky="w")  # Title in the first row
+
+            maintenance_label = Label(maintenance_info_frame, text=f"{plant_details[8]}", font=("Arial", 12), fg="black", bg=right_frame["bg"])
+            maintenance_label.grid(row=3, column=1, padx=10, pady=5, sticky="w")  # Info label underneath
+
+            # Create the bottom frame for "Plant Characteristics"
+            bottom_frame = Frame(right_frame, bg="grey", bd=2, relief="solid")  # Border with grey background
+            bottom_frame.pack(fill="x", padx=10, pady=10, expand=False)
+
+            # Add the label to the bottom frame
+            bottom_label = Label(bottom_frame, text="Plant Characteristics", font=("Arial", 14, "bold"), bg="grey")
+            bottom_label.pack(pady=5, padx=10)
+
+            #plant characteristics frame
+            pc_frame = Frame(right_frame, bg=right_frame["bg"])
+            pc_frame.pack(fill="x", padx=10, pady=10)
+
+            # Row 1 - "Flower Colour" Title and info label
+            flower_color = Label(pc_frame, text=f"Flower Color", font=("Arial", 12, "bold"), fg="black", bg=right_frame["bg"])
+            flower_color.grid(row=0, column=0, padx=10, pady=5, sticky="w")  # Title in the first row
+            
+            flower_color_label = Label(pc_frame, text=f"{plant_details[4]}", font=("Arial", 12), fg="black", bg=right_frame["bg"])
+            flower_color_label.grid(row=1, column=0, padx=10, pady=5, sticky="w")  # Info label underneath
+
+            # Row 2 - "Foliage Color" title and info label
+            foliage_color = Label(pc_frame, text="Foliage Color", font=("Arial", 12, "bold"), fg="black", bg=right_frame["bg"])
+            foliage_color.grid(row=0, column=1, padx=10, pady=5, sticky="w")  # Title in the first row
+
+            foliage_color_label = Label(pc_frame, text=f"{plant_details[9]}", font=("Arial", 12), fg="black", bg=right_frame["bg"])
+            foliage_color_label.grid(row=1, column=1, padx=10, pady=5, sticky="w")  # Info label underneath
+
+            # Row 3 - "Perfume" title and info label
+            perfume = Label(pc_frame, text="Perfume", font=("Arial", 12, "bold"), fg="black", bg=right_frame["bg"])
+            perfume.grid(row=0, column=2, padx=10, pady=5, sticky="w")  # Title in the first row
+
+            perfume_label = Label(pc_frame, text=f"{plant_details[10]}", font=("Arial", 12), fg="black", bg=right_frame["bg"])
+            perfume_label.grid(row=1, column=2, padx=10, pady=5, sticky="w")  # Info label underneath
+
+            # Row 4 - "Aromatic" title and info label
+            aromatic = Label(pc_frame, text="Aromatic", font=("Arial", 12, "bold"), fg="black", bg=right_frame["bg"])
+            aromatic.grid(row=2, column=0, padx=10, pady=5, sticky="w")  # Title in the first row
+
+            aromatic_label = Label(pc_frame, text=f"{plant_details[11].replace(',', ', ')}", font=("Arial", 12), fg="black", bg=right_frame["bg"])
+            aromatic_label.grid(row=3, column=0, padx=10, pady=5, sticky="w")  # Info label underneath
+
+            # Row 5 - "Edible" title and info label
+            edible = Label(pc_frame, text="Edible", font=("Arial", 12, "bold"), fg="black", bg=right_frame["bg"])
+            edible.grid(row=2, column=1, padx=10, pady=5, sticky="w")  # Title in the first row
+
+            edible_label = Label(pc_frame, text=f"{plant_details[12]}", font=("Arial", 12), fg="black", bg=right_frame["bg"])
+            edible_label.grid(row=3, column=1, padx=10, pady=5, sticky="w")  # Info label underneath
+
+            # Notes Frame
+            notes = Frame(right_frame, bg="grey", bd=2, relief="solid")
+            notes.pack(fill="x", padx=10, pady=10, expand=False)
+
+            # Add the label to the top frame
+            notes_label = Label(notes, text="Notes:", font=("Arial", 14, "bold"), bg="grey")
+            notes_label.pack(pady=5, padx=(10, 0), side="left")
+
+            if plant_details[13]:
+                notes_text = plant_details[13]
+
+                text_width = len(notes_text)
+                max_width = 50
+
+                if text_width > max_width:
+                    notes_info = Label(notes, text="Click to view full notes", font=("Arial", 14, "italic"), fg="blue", bg="grey", cursor="hand2")
+                    notes_info.pack(pady=5, padx=10, side="left")
+
+                    # opens a unique window of a particular plant details notes (database retrieval)
+                    def show_full_notes():
+                        full_notes_window = Toplevel()
+                        full_notes_window.title(f"{plant_details[0]} Notes")
+
+                        full_notes_window.resizable(True, True)
+                        
+                        full_notes_frame = Frame(full_notes_window, bg="grey")
+                        full_notes_frame.pack(fill=BOTH, expand=TRUE)
+
+                        notes_label = Label(full_notes_frame, text="Notes:", font=("Arial", 14, "bold"), anchor="w", bg="grey", justify="left")
+                        notes_label.pack(padx=10, pady=(10, 0), fill="x")
+                        
+                        # Create the label with text wrapping and justification
+                        full_notes_label = Label(full_notes_frame, 
+                                                text=notes_text, 
+                                                font=("Arial", 14), 
+                                                wraplength=380, 
+                                                justify="left", 
+                                                bg="grey", 
+                                                anchor="w")  # 'anchor="w"' aligns the text to the left
+                        
+                        # Add padding around the label
+                        full_notes_label.pack(padx=10, pady=(0, 10), fill=BOTH, expand=True)
+                    
+                    notes_info.bind("<Button-1>", lambda e: show_full_notes())
+                
+                else:
+                    # If the text fits, just show it normally
+                    notes_info = Label(notes, text=notes_text, font=("Arial", 14), bg="grey")
+                    notes_info.pack(pady=5, padx=0, side="left")
+            else:
+                # If there are no notes, display a default message
+                no_info = Label(notes, text="No extra notes", font=("Arial", 14), bg="grey")
+                no_info.pack(pady=5, side="left")
+        
     else:
         print("No details found for this plant.")
 
@@ -905,7 +932,7 @@ def refresh_favorites():
 
     show_favourite_plants(favorites_frame, user_favorites)
 
-
+# function that displays favourite plants in the given frame
 def show_favourite_plants(parent_frame, plants):
     if not plants:
         label = Label(parent_frame, text="No favorite plants added.", font=("Arial", 12), bg=favorites_window["bg"])
@@ -972,6 +999,7 @@ def show_advanced_search():
     plants = fetch_plant_results()
     show_plants(plants)
 
+# Showing entry search results
 def show_entry_search(event=None):
 
     clear_frame()
