@@ -19,6 +19,9 @@ INSERT INTO users (username, first_name, last_name, `password`)
     
 UPDATE users SET first_name = "Joaquin" WHERE username = "joaquinbgarcia" AND `password` = "testing";
 UPDATE users SET last_name = "Garcia" WHERE username = "joaquinbgarcia" AND `password` = "testing";
+
+ALTER TABLE users
+RENAME COLUMN user_id to `User ID`;
     
 # Sample user retrieval
 SELECT * FROM users WHERE username = "joaquinbgarcia";

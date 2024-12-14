@@ -5,12 +5,13 @@ Our Garden Paradise Database
 Creation!
 
 */
+CREATE DATABASE garden_paradise;
 USE garden_paradise;
 
 ########################### CREATING PLANTS TABLE #########################
 
 #Create plants table
-CREATE TABLE plants (
+CREATE TABLE IF NOT EXISTS plants (
 	id INT,
     `Plant ID` INT NOT NULL AUTO_INCREMENT,
     `Plant Code` TEXT,

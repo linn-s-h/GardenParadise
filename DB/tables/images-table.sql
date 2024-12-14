@@ -1,68 +1,7 @@
-
-/*
-
-Our Garden Paradise Database
-Creation!
-
-*/
-
-#Create plants table
-CREATE TABLE plants (
-	id INT,
-    `Plant ID` INT NOT NULL AUTO_INCREMENT,
-    `Plant Code` TEXT,
-    `Botanical Name` TEXT,
-    `Common Name` TEXT,
-    `Previous Name` TEXT,
-    `Plant Type` TEXT,
-    `Water Needs` TEXT,
-    `Climate Zones` TEXT,
-    `Light Needs` TEXT,
-    `Soil Type` TEXT,
-    `Soil Additional` TEXT,
-    `Maintenance` TEXT,
-    `Abcission` TEXT,
-    `Height Ranges` TEXT,
-    `Spread Ranges` TEXT,
-    `Flower Colour` TEXT,
-    `Foliage Colour` TEXT,
-    `Perfume` TEXT,
-    `Aromatic` TEXT,
-    `Edible` TEXT,
-    `Bird Attracting` TEXT,
-    `Bird Attractant` TEXT,
-    `Bore Water Tolerance` TEXT,
-    `Frost Tolerance` TEXT,
-    `Greywater Tolerance` TEXT,
-    `Native` TEXT,
-    `Butterfly Attracting` TEXT,
-    `Butterfly Type` TEXT,
-    `Image` TEXT,
-    `Image Location` TEXT,
-    `Image Owner` TEXT,
-    `Herb External Have` TEXT,
-    `Herb Images Change To` TEXT,
-    `Notes` TEXT,
-    `Why Photo Removed` TEXT,
-    `Why Plant Removed` TEXT,
-    `Actioned By` TEXT,
-    `Date Actioned` TEXT,
-    `Status` TEXT,
-    PRIMARY KEY (`Plant ID`)
-);
-
-#Edited out because it didn' work. Used Load Data Import Wizard instead
-/*
-LOAD DATA LOCAL INFILE '/path/waterwise-plants.csv'
-INTO TABLE garden_paradise.plants
-FIELDS TERMINATED BY ',' 
-ENCLOSED BY '"'
-LINES TERMINATED BY '\n'
-IGNORE 1 ROWS;
-*/
+############################### CREATING IMAGES TABLE ############################
 
 #Create table
-CREATE TABLE images (
+CREATE TABLE IF NOT EXISTS images (
 	`Image ID` INT NOT NULL AUTO_INCREMENT, 
     `Plant ID` INT,
     `Image` TEXT,
@@ -74,8 +13,6 @@ CREATE TABLE images (
     FOREIGN KEY (`Plant ID`) REFERENCES plants(`Plant ID`)
 );
 
-SELECT * FROM plants;
-
 #Insert data
 INSERT INTO images (`Plant ID`,`Image`, `Image Location`, `Image Owner`, `Herb Images Change To`, `Why Photo Removed`)
 SELECT `Plant ID`, `Image`, `Image Location`, `Image Owner`, `Herb Images Change To`, `Why Photo Removed` FROM plants;
@@ -85,24 +22,22 @@ ALTER TABLE plants
 ADD COLUMN `Image ID` 
 INT NOT NULL AFTER `Butterfly Type`;
 
+SET SQL_SAFE_UPDATES = 0;
+
 #Updating rows to corresponding ids
 UPDATE plants
 SET `Image ID` = (SELECT images.`Image ID` 
                   FROM images 
-                  WHERE images.`Plant ID` = plants.`Plant ID`);
- 
+                  WHERE images.`Plant ID` = plants.`Plant ID`
+                  LIMIT 1);
+                  
+SET SQL_SAFE_UPDATES = 1;
+
 #Modifying foreign key      
 ALTER TABLE plants 
 ADD CONSTRAINT fk_images_id
 FOREIGN KEY (`Image ID`) 
 REFERENCES images(`Image ID`);
-
-#Commands when inserts goes wrong
-ALTER TABLE plants DROP CONSTRAINT fk_images_id;
-ALTER TABLE plants DROP FOREIGN KEY `Image ID`;
-ALTER TABLE plants DROP COLUMN `Image ID`;
-
-SELECT * FROM images;
 
 #Deleted columns from plants that have been moved to images table
 ALTER TABLE plants
@@ -115,95 +50,12 @@ DROP COLUMN `Why Photo Removed`;
 ALTER TABLE plants
 DROP COLUMN id;
 
-ALTER TABLE `mydb`.`plants` 
-CHANGE COLUMN `plant_id` `Plant ID` INT NOT NULL ;
-
-SET GLOBAL wait_timeout = 600;
-SET GLOBAL interactive_timeout = 600;
-
-
-SELECT COUNT(`Plant Type`), (SELECT DISTINCT `Plant Type`) FROM plants GROUP BY `Plant Type`;
-
-# Create USER table
-CREATE TABLE IF NOT EXISTS users (
-	user_id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(50) UNIQUE NOT NULL,
-    `password` VARCHAR(255) NOT NULL
-    );
-    
-# Alter users table add first_name
-ALTER TABLE users ADD COLUMN `first_name` VARCHAR(50) NOT NULL AFTER username;
-
-# Alter users table add last_name
-ALTER TABLE users ADD COLUMN `last_name` VARCHAR(50) NOT NULL AFTER first_name;
-
-# Sample "new user" insert query
-INSERT INTO users (username, `password`)
-	VALUES ('joaquinbgarcia', 'testing');
-    
-UPDATE users SET first_name = "Joaquin" WHERE username = "joaquinbgarcia" AND `password` = "testing";
-UPDATE users SET last_name = "Garcia" WHERE username = "joaquinbgarcia" AND `password` = "testing";
-
-ALTER TABLE users RENAME COLUMN user_id TO `User ID`;
-
-############################### CREATING IMAGES TABLE ############################
-
-#Create table
-CREATE TABLE images (
-	`Image ID` INT NOT NULL AUTO_INCREMENT, 
-    `Plant ID` INT,
-    `Image` TEXT,
-    `Image Location` TEXT,
-    `Image Owner` TEXT,
-    `Herb Images Change To` TEXT,
-    `Why Photo Removed` TEXT,
-    PRIMARY KEY (`Image ID`),
-    FOREIGN KEY (`Plant ID`) REFERENCES plants(`Plant ID`)
-);
-
-#Insert data
-INSERT INTO images (`Plant ID`,`Image`, `Image Location`, `Image Owner`, `Herb Images Change To`, `Why Photo Removed`)
-SELECT `Plant ID`, `Image`, `Image Location`, `Image Owner`, `Herb Images Change To`, `Why Photo Removed` FROM plants;
-
-#Making column/index
-ALTER TABLE plants 
-ADD COLUMN `Image ID` 
-INT NOT NULL AFTER `Butterfly Type`;
-
-#Updating rows to corresponding ids
-UPDATE plants
-SET `Image ID` = (SELECT images.`Image ID` 
-                  FROM images 
-                  WHERE images.`Plant ID` = plants.`Plant ID`);
- 
-#Modifying foreign key      
-ALTER TABLE plants 
-ADD CONSTRAINT fk_images_id
-FOREIGN KEY (`Image ID`) 
-REFERENCES images(`Image ID`);
-
-#Commands when inserts goes wrong
-ALTER TABLE plants DROP CONSTRAINT fk_images_id;
-ALTER TABLE plants DROP FOREIGN KEY `Image ID`;
-ALTER TABLE plants DROP COLUMN `Image ID`;
-
-SELECT * FROM images;
-
-#Deleted columns from plants that have been moved to images table
-ALTER TABLE plants
-DROP COLUMN `Image`,
-DROP COLUMN `Image Location`,
-DROP COLUMN `Image Owner`,
-DROP COLUMN `Herb Images Change To`,
-DROP COLUMN `Why Photo Removed`;
-
-ALTER TABLE plants
-DROP COLUMN _id;
-
 ALTER TABLE images
 DROP COLUMN `Image Owner`,
 DROP COLUMN `Herb Images Change To`,
 DROP COLUMN `Why Photo Removed`;
+
+SELECT * FROM images;
 
 ############################# ADDING IMAGES ###########################
   
@@ -224,7 +76,8 @@ WHERE `Image` LIKE "No";
 #Set Orchid Default Image
 UPDATE images
 SET `Image Location` = 'plants/orchid/orchid_default.png'
-WHERE `Plant ID` IN (
+WHERE `Image` LIKE "Yes"
+AND `Plant ID` IN (
     SELECT `Plant ID`
     FROM plants
     WHERE `Plant Type` LIKE "%Orchid%"
@@ -244,7 +97,8 @@ AND `Plant ID` IN (
 #Yellow Orchid
 UPDATE images
 SET `Image Location` = 'plants/orchid/orchid_yellow.png'
-WHERE `Plant ID` IN (
+WHERE `Image` LIKE "Yes"
+AND `Plant ID` IN (
     SELECT `Plant ID`
     FROM plants
     WHERE `Plant Type` LIKE "%Orchid%"
@@ -472,48 +326,117 @@ AND `Plant ID` IN (
     AND `Flower Colour` LIKE "%Orange%"
 );
 
-SET SQL_SAFE_UPDATES = 0;
+#Palm default
+UPDATE images
+SET `Image Location` = 'plants/palm/palm_default.png'
+WHERE `Image` LIKE "Yes"
+AND `Plant ID` IN (
+    SELECT `Plant ID`
+    FROM plants
+    WHERE `Plant Type` LIKE "%Palm%"
+);
 
-############################# FAVOURITES TABLE ###########################
-# Create favourites table
-CREATE TABLE IF NOT EXISTS favourites (
-	favourite_id INT AUTO_INCREMENT PRIMARY KEY,
-	`User ID` INT NOT NULL,
-    `Plant ID` INT NOT NULL,
-    FOREIGN KEY (`User ID`) REFERENCES users(`USER ID`) ON DELETE CASCADE,
-    FOREIGN KEY (`Plant ID`) REFERENCES plants(`Plant ID`) ON DELETE CASCADE,
-    UNIQUE(`User ID`, `Plant ID`)
-    );
+#Herb default
+UPDATE images
+SET `Image Location` = 'plants/herb/herb_default.png'
+WHERE `Image` LIKE "Yes"
+AND `Plant ID` IN (
+    SELECT `Plant ID`
+    FROM plants
+    WHERE `Plant Type` LIKE "%Herb%"
+);
 
-# add timestamp column
-ALTER TABLE favourites
-ADD COLUMN added_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+#Groundcover default
+UPDATE images
+SET `Image Location` = 'plants/groundcover/groundcover_default.png'
+WHERE `Image` LIKE "Yes"
+AND `Plant ID` IN (
+    SELECT `Plant ID`
+    FROM plants
+    WHERE `Plant Type` LIKE "%Groundcover%"
+);
 
-# Test Insert
-INSERT INTO favourites (`User ID`, `Plant ID`) VALUES (1, 2);
-INSERT INTO favourites (`User ID`, `Plant ID`) VALUES (1, 3);
+#Grass default
+UPDATE images
+SET `Image Location` = 'plants/grass/grass_default.png'
+WHERE `Image` LIKE "Yes"
+AND `Plant ID` IN (
+    SELECT `Plant ID`
+    FROM plants
+    WHERE `Plant Type` LIKE "%Grass%"
+);
 
-# Test duplicates
-SELECT * FROM favourites WHERE `User ID` = 1 AND `Plant ID` = 2;
+#Fruit default
+UPDATE images
+SET `Image Location` = 'plants/fruit/fruit_default.png'
+WHERE `Image` LIKE "Yes"
+AND `Plant ID` IN (
+    SELECT `Plant ID`
+    FROM plants
+    WHERE `Plant Type` LIKE "%Fruit%"
+);
 
-# Test Retrieval
-SELECT p.*
-FROM plants p
-JOIN favourites f ON p.`Plant ID` = f.`Plant ID`
-WHERE f.`User ID` = 1;
+#Fern default
+UPDATE images
+SET `Image Location` = 'plants/fern/fern_default.png'
+WHERE `Image` LIKE "Yes"
+AND `Plant ID` IN (
+    SELECT `Plant ID`
+    FROM plants
+    WHERE `Plant Type` LIKE "%Fern%"
+);
 
-# Test Retrieval
-SELECT p.`Common Name`, p.`Botanical Name`, p.`Plant ID`
-    FROM favourites f
-    JOIN plants p ON f.`Plant ID` = p.`Plant ID`
-    WHERE f.`User ID` = 1 ORDER BY f.added_date ASC;
+#Climber default
+UPDATE images
+SET `Image Location` = 'plants/climber/climber_default.png'
+WHERE `Image` LIKE "Yes"
+AND `Plant ID` IN (
+    SELECT `Plant ID`
+    FROM plants
+    WHERE `Plant Type` LIKE "%climber%"
+);
 
-# Delete from favourites example
-DELETE FROM favourites WHERE `User ID` = 1 AND `Plant ID` = 2;
+#Bulb default
+UPDATE images
+SET `Image Location` = 'plants/bulb/bulb_default.png'
+WHERE `Image` LIKE "Yes"
+AND `Plant ID` IN (
+    SELECT `Plant ID`
+    FROM plants
+    WHERE `Plant Type` LIKE "%Bulb%"
+);
 
+#Bromeliad default
+UPDATE images
+SET `Image Location` = 'plants/bromeliad/bromeliad_default.png'
+WHERE `Image` LIKE "Yes"
+AND `Plant ID` IN (
+    SELECT `Plant ID`
+    FROM plants
+    WHERE `Plant Type` LIKE "%Bromeliad%"
+);
 
+#Bamboo default
+UPDATE images
+SET `Image Location` = 'plants/bamboo/bamboo_default.png'
+WHERE `Image` LIKE "Yes"
+AND `Plant ID` IN (
+    SELECT `Plant ID`
+    FROM plants
+    WHERE `Plant Type` LIKE "%Bamboo%"
+);
 
-SELECT * FROM users;
+#Aquatic default
+UPDATE images
+SET `Image Location` = 'plants/aquatic/aquatic_default.png'
+WHERE `Image` LIKE "Yes"
+AND `Plant ID` IN (
+    SELECT `Plant ID`
+    FROM plants
+    WHERE `Plant Type` LIKE "%Aquatic%"
+);
+
+SET SQL_SAFE_UPDATES = 1;
+
 SELECT * FROM plants;
-SELECT * FROM favourites;
-DROP TABLE favourites;
+SELECT * FROM images;
