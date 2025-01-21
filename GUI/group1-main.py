@@ -1,10 +1,11 @@
 import mysql.connector
 import os
+import config
 from tkinter import *
 from tkinter import PhotoImage
 from tkinter import messagebox
 from PIL import Image, ImageTk
-from App import config
+
 
 logged_in = FALSE
 logged_in_user = None
@@ -24,7 +25,7 @@ def connectDB():
         host = config.DB_HOST,
         user = config.DB_USER,
         passwd = config.DB_PASSWORD,
-        database = config.DB_DATABASE
+        database = config.DB_NAME
     )
     mycursor = mydb.cursor()
     return mydb, mycursor
@@ -673,10 +674,6 @@ def show_selected_plant(plant_id, user_id):
         update_favorite_button(plant_window, user_id, plant_id)
         plant_window.plant_id = plant_id
         plant_windows[plant_id] = plant_window
-        
-        
-
-        
 
         # Image
         path = get_image_path(plant_id)
@@ -824,6 +821,7 @@ def show_selected_plant(plant_id, user_id):
                 notes_info = Label(notes, text="Click to view full notes", font=("Arial", 14, "italic"), fg="blue", bg="grey", cursor="hand2")
                 notes_info.pack(pady=5, padx=10, side="left")
 
+                # opens a new text window with all the notes written for the plants
                 def show_full_notes():
                     full_notes_window = Toplevel()
                     full_notes_window.title(f"{plant_details[0]} Notes")
@@ -947,7 +945,7 @@ def refresh_favorites():
 
     show_favourite_plants(favorites_frame, user_favorites)
 
-
+# displays favorite plants in the given frame
 def show_favourite_plants(parent_frame, plants):
     if not plants:
         label = Label(parent_frame, text="No favorite plants added.", font=("Arial", 12), bg=favorites_window["bg"])
