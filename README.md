@@ -1,7 +1,6 @@
 
 # Garden Paradise 🪴✨
-Garden Paradise was made in a relational database project, over three weeks, during my exchange in South Kore! It is a plant search app for beginner plant owners, who want to expand their plant collection and need help narrowing down their choices. I want to extend my gratitudes to my project partner Joaquin and professor Gaya for giving me such a valuable experience <3
-
+Garden Paradise was made in a relational database project, over three weeks, during my exchange in South Kore! It is a plant search app for beginner plant owners, who want to expand their plant collection and need help narrowing down their choices. 
 
 ![image](https://github.com/user-attachments/assets/45b107ad-098e-4384-a468-ee75f8f65fe7) 
 
@@ -16,11 +15,7 @@ Garden Paradise was made in a relational database project, over three weeks, dur
 - Python and SQL
 - Tkinter for GUI development
 - Pillow (PIL) for opening and resizing images
-  
-
-## Correlation between App and DB course
--
-
+- 
 
 ## What did I learn?
 - Be critical of your data, so you don't get unexpected results in queries
@@ -30,4 +25,6 @@ Garden Paradise was made in a relational database project, over three weeks, dur
 
 ![image](https://github.com/user-attachments/assets/30650aee-425c-4c97-8b59-61a8214e9d93)
 
-> Link to presentation for more details! 
+> Link to presentation for more details!
+
+Finally, I want to extend my gratitudes to my project partner, Joaquin, and professor Gaya for giving me such a valuable experience ❤️‍🔥
