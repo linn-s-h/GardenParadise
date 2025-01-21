@@ -14,8 +14,8 @@ Garden Paradise was made in a relational database project, over three weeks, dur
 ## Languages, frameworks and packages
 - Python and SQL
 - Tkinter for GUI development
-- Pillow (PIL) for opening and resizing images
-- 
+- Pillow (PIL) for opening and resizing plant images
+  
 
 ## What did I learn?
 - Be critical of your data, so you don't get unexpected results in queries
@@ -25,6 +25,6 @@ Garden Paradise was made in a relational database project, over three weeks, dur
 
 ![image](https://github.com/user-attachments/assets/30650aee-425c-4c97-8b59-61a8214e9d93)
 
-> Link to presentation for more details!
+> Link to presentation for more details! [Presentation](Garden Paradise Presentation.pdf)
 
 Finally, I want to extend my gratitudes to my project partner, Joaquin, and professor Gaya for giving me such a valuable experience ❤️‍🔥
