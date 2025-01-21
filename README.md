@@ -25,6 +25,6 @@ Garden Paradise was made in a relational database project, over three weeks, dur
 
 ![image](https://github.com/user-attachments/assets/30650aee-425c-4c97-8b59-61a8214e9d93)
 
-> Link to presentation for more details! [Presentation](Garden Paradise Presentation.pdf)
+> Link to presentation for more details! [Presentation](GardenParadisePresentation.pdf)
 
 Finally, I want to extend my gratitudes to my project partner, Joaquin, and professor Gaya for giving me such a valuable experience ❤️‍🔥
