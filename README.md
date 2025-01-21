@@ -2,7 +2,7 @@
 Garden Paradise was made in a relational database course during my exchange in South Korea. It is a plant search app for beginner plant owners, who want to expand their plant collection and need help narrowing down their choices. 
 
 ## Main Functions
-- Quick search
+- Quick search 🔍
 - Advanced search
 - Login and sign up
 - Favorites
