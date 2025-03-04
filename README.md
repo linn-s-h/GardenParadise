@@ -1,6 +1,6 @@
 
 # Garden Paradise 🪴✨
-Garden Paradise was made in a relational database project, over three weeks, during my exchange in South Kore! It is a plant search app for beginner plant owners, who want to expand their plant collection and need help narrowing down their choices. 
+Garden Paradise was made in a relational database project, over three weeks, during my exchange in South Korea! It is a plant search app for beginner plant owners, who want to expand their plant collection and need help narrowing down their choices. 
 
 ![image](https://github.com/user-attachments/assets/45b107ad-098e-4384-a468-ee75f8f65fe7) 
 
