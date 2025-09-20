@@ -1,7 +1,7 @@
 
 # Garden Paradise 🪴✨
 
-In Spring 2024, I spent a semester in South Korea on exchange. Garden Paradise was a collaborative team project in my all-time favorite course — Relational Databases. It's a plant search tool for beginner plant owners looking to expand their collection and need help narrowing down "next plant" options. The intention is to let users expand their plant knowledge and dictionary, and save their searches for future reference. This project was developed using Python and SQL, with Tkinter for GUI. Our data comes from Queensland’s Government’s ‘Waterwise Plants’ dataset.
+In Autumn 2024, I spent a semester in South Korea on exchange. Garden Paradise was a collaborative team project in my all-time favorite course — Relational Databases. It's a plant search tool for beginner plant owners looking to expand their collection and need help narrowing down "next plant" options. The intention is to let users expand their plant knowledge and dictionary, and save their searches for future reference. This project was developed using Python and SQL, with Tkinter for GUI. Our data comes from Queensland’s Government’s ‘Waterwise Plants’ dataset.
 
 ![image](https://github.com/user-attachments/assets/45b107ad-098e-4384-a468-ee75f8f65fe7) 
 
